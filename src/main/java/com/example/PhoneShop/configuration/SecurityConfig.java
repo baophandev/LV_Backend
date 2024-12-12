@@ -1,0 +1,36 @@
+package com.example.PhoneShop.configuration;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    // Đảm bảo đường dẫn đúng với các endpoint của bạn
+    private final String[] PUBLIC_ENDPOINTS = {"/category/**", "/product/**"};
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.authorizeHttpRequests(request ->
+//                request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS).permitAll()
+//                        .anyRequest().authenticated());
+                        request.anyRequest().permitAll() // Cho phép tất cả các endpoint
+
+        );
+        // Tắt CSRF nếu bạn không sử dụng CSRF protection
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
+        return httpSecurity.build();
+    }
+
+}
