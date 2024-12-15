@@ -31,6 +31,9 @@ public class Product {
     @Column(name = "prd_rating")
     Double rating;
 
+    @Column(name = "prd_price")
+    Integer price;
+
     @Column(name = "prd_sold")
     Integer sold;
 

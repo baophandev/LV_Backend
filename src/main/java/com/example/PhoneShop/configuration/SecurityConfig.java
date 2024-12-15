@@ -8,6 +8,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,13 +29,28 @@ public class SecurityConfig {
 //                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
 //                        .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS).permitAll()
 //                        .anyRequest().authenticated());
+
                         request.anyRequest().permitAll() // Cho phép tất cả các endpoint
 
         );
         // Tắt CSRF nếu bạn không sử dụng CSRF protection
+        httpSecurity.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Cho phép React
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả header
+        configuration.setAllowCredentials(true); // Cho phép gửi cookie nếu cần
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Áp dụng cho tất cả endpoint
+        return source;
     }
 
 }

@@ -4,6 +4,7 @@ package com.example.PhoneShop.controller;
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
+import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.CategoryResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.service.ProductService;
@@ -46,5 +47,21 @@ public class ProductController {
     ){
         Pageable pageable = PageRequest.of(page, size);
         return productService.getAll(pageable);
+    }
+
+    @PutMapping("/{productId}")
+    ProductResponse update(@PathVariable String productId, @Valid @RequestBody UpdateProductRequest request){
+        return productService.updateProduct(productId, request);
+    }
+
+    @GetMapping("/{productId}")
+    ProductResponse getById(@PathVariable String productId){
+        return productService.getById(productId);
+    }
+
+    @DeleteMapping("/{productId}")
+    String delete(@PathVariable String productId){
+        productService.delete(productId);
+        return "Product has been deleted";
     }
 }

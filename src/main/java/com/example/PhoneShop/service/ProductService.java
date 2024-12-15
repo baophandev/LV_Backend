@@ -3,6 +3,7 @@ package com.example.PhoneShop.service;
 
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
+import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.entities.Category;
 import com.example.PhoneShop.entities.Image;
@@ -39,7 +40,8 @@ public class ProductService {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-
+        product.setPrice(request.getPrice());
+        log.info("Set product price: {}", product.getPrice());
         Category category = categoryRepository.findById(request.getCategoryId())
                         .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category not found", "category-e-01"));
         product.setCategory(category);
@@ -63,6 +65,16 @@ public class ProductService {
 
     }
 
+    public ProductResponse updateProduct(String id, UpdateProductRequest request){
+        Product product = productRepository.findById(id).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+
+        return productMapper.toProductResponse(productRepository.save(product));
+
+    }
+
     public CustomPageResponse<ProductResponse> getAll(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
 
@@ -80,5 +92,12 @@ public class ProductService {
                 .build();
     }
 
+    public ProductResponse getById(String id){
+        return productMapper.toProductResponse(productRepository.findById(id)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist!", "product-e-02")));
+    }
 
+    public void delete(String id){
+        productRepository.deleteById(id);
+    }
 }
