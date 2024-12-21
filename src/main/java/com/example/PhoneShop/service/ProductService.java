@@ -13,6 +13,7 @@ import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.ProductMapper;
 import com.example.PhoneShop.repository.CategoryRepository;
+import com.example.PhoneShop.repository.ImageRepository;
 import com.example.PhoneShop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +37,10 @@ import java.util.List;
 public class ProductService {
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
+    ImageRepository imageRepository;
     ProductMapper productMapper;
 
-    public ProductResponse create(CreateProductRequest request){
+    public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
@@ -52,9 +56,10 @@ public class ProductService {
         List<Review> reviews = new ArrayList<>();
         product.setReviews(reviews);
         List<Image> images = new ArrayList<>();
-        for(String imagePath : request.getImagePaths()){
+        for(MultipartFile file : files){
             Image image = Image.builder()
-                    .path(imagePath)
+                    .imageType(file.getContentType())
+                    .data(file.getBytes())
                     .product(product)
                     .build();
             images.add(image);
@@ -70,6 +75,7 @@ public class ProductService {
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
+        product.setStatus(request.getStatus());
 
         return productMapper.toProductResponse(productRepository.save(product));
 

@@ -14,10 +14,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,9 +29,12 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping
-    ResponseEntity<ApiResponse<ProductResponse>> create(@RequestBody @Valid CreateProductRequest request){
-        ProductResponse productResponse = productService.create(request);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<ProductResponse>> create(
+            @RequestPart("product") @Valid CreateProductRequest request,
+            @RequestPart("files") List<MultipartFile> files) throws IOException {
+
+        ProductResponse productResponse = productService.create(request, files);
 
         ApiResponse<ProductResponse> response = ApiResponse.<ProductResponse>builder()
                 .message("Add product successfully")
@@ -36,7 +42,7 @@ public class ProductController {
                 .data(productResponse)
                 .build();
 
-        return  ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 

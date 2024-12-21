@@ -18,8 +18,11 @@ public class Image {
     @Column(name = "img_id")
     String id;
 
-    @Column(name = "img_path", nullable = false)
-    String path;
+    @Column(name = "img_type", nullable = false)
+    String imageType;
+
+    @Lob
+    private byte[] data;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prd_id")

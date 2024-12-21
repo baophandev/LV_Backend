@@ -23,7 +23,7 @@ public class CreateProductRequest {
     String name;
 
     @NotBlank(message = "Description can not be blank")
-    @Size(min = 10, max = 10000, message = "Description must be between 10 and 1000 characters")
+    @Size(min = 10, message = "Description must be at least 10 characters")
     String description;
 
     @NotNull(message = "Price can not be blank")
@@ -31,9 +31,4 @@ public class CreateProductRequest {
 
     @NotBlank(message = "Category ID is required")
     String categoryId;
-
-    @NotEmpty(message = "At least one image path is required")
-    @Size(min = 1, message = "Min 1")
-    List<@NotBlank(message = "Image path cannot be blank") String> imagePaths;
-
 }
