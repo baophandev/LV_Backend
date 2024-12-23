@@ -110,7 +110,38 @@ public class ProductService {
     public CustomPageResponse<ProductResponse> getAll(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
 
-        List<ProductResponse> productResponses = products.getContent().stream().map(productMapper::toProductResponse).toList();
+        List<ProductResponse> productResponses = products.getContent()
+                .stream().map(productMapper::toProductResponse).toList();
+
+        return CustomPageResponse.<ProductResponse>builder()
+                .pageNumber(products.getNumber())
+                .pageSize(products.getSize())
+                .totalElements(products.getTotalElements())
+                .totalPages(products.getTotalPages())
+                .content(productResponses)
+                .build();
+    }
+
+    public CustomPageResponse<ProductResponse> getByStatus(ProductStatus status, Pageable pageable){
+        Page<Product> products = productRepository.findByStatus(status, pageable);
+
+        List<ProductResponse> productResponses = products.getContent()
+                .stream().map(productMapper::toProductResponse).toList();
+
+        return CustomPageResponse.<ProductResponse>builder()
+                .pageNumber(products.getNumber())
+                .pageSize(products.getSize())
+                .totalElements(products.getTotalElements())
+                .totalPages(products.getTotalPages())
+                .content(productResponses)
+                .build();
+    }
+
+    public CustomPageResponse<ProductResponse> getByCategoryId(String categoryId, Pageable pageable){
+        Page<Product> products = productRepository.findByCategoryId(categoryId, pageable);
+
+        List<ProductResponse> productResponses = products.getContent()
+                .stream().map(productMapper::toProductResponse).toList();
 
         return CustomPageResponse.<ProductResponse>builder()
                 .pageNumber(products.getNumber())

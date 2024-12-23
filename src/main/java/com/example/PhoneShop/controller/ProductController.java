@@ -7,6 +7,7 @@ import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.CategoryResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
+import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,25 @@ public class ProductController {
     ){
         Pageable pageable = PageRequest.of(page, size);
         return productService.getAll(pageable);
+    }
+
+    @GetMapping("/active")
+    CustomPageResponse<ProductResponse> getActiveProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        return productService.getByStatus(ProductStatus.ACTIVE, pageable);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    CustomPageResponse<ProductResponse> getProductsByCategoryId(
+            @PathVariable String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        return productService.getByCategoryId(categoryId, pageable);
     }
 
     @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
