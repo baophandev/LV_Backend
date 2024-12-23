@@ -75,6 +75,16 @@ public class ProductController {
         return productService.getByCategoryId(categoryId, pageable);
     }
 
+    @GetMapping("/active/category/{categoryId}")
+    CustomPageResponse<ProductResponse> getProductsByStatusAndCategoryId(
+            @PathVariable String categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        return productService.getByStatusAndCategoryId(ProductStatus.ACTIVE, categoryId, pageable);
+    }
+
     @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<ProductResponse>> update(
             @PathVariable String productId,

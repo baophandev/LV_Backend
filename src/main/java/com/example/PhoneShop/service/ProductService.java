@@ -152,6 +152,22 @@ public class ProductService {
                 .build();
     }
 
+    public CustomPageResponse<ProductResponse> getByStatusAndCategoryId(ProductStatus status, String categoryId, Pageable pageable){
+        Page<Product> products = productRepository.findByStatusAndCategoryId(status, categoryId, pageable);
+
+        List<ProductResponse> productResponses = products.getContent()
+                .stream().map(productMapper::toProductResponse).toList();
+
+        return CustomPageResponse.<ProductResponse>builder()
+                .pageNumber(products.getNumber())
+                .pageSize(products.getSize())
+                .totalElements(products.getTotalElements())
+                .totalPages(products.getTotalPages())
+                .content(productResponses)
+                .build();
+    }
+
+
     public ProductResponse getById(String id) {
         return productMapper.toProductResponse(productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist!", "product-e-02")));
