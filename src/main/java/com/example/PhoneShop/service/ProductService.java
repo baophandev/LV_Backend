@@ -37,7 +37,6 @@ import java.util.List;
 public class ProductService {
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
-    ImageRepository imageRepository;
     ProductMapper productMapper;
 
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
@@ -47,7 +46,8 @@ public class ProductService {
         product.setPrice(request.getPrice());
         log.info("Set product price: {}", product.getPrice());
         Category category = categoryRepository.findById(request.getCategoryId())
-                        .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category not found", "category-e-01"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category not found", "category-e-01"));
+
         product.setCategory(category);
         product.setStatus(ProductStatus.DRAFT);
         product.setRating(0.0);
@@ -56,7 +56,8 @@ public class ProductService {
         List<Review> reviews = new ArrayList<>();
         product.setReviews(reviews);
         List<Image> images = new ArrayList<>();
-        for(MultipartFile file : files){
+
+        for (MultipartFile file : files) {
             Image image = Image.builder()
                     .imageType(file.getContentType())
                     .data(file.getBytes())
@@ -70,24 +71,46 @@ public class ProductService {
 
     }
 
-    public ProductResponse updateProduct(String id, UpdateProductRequest request){
-        Product product = productRepository.findById(id).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
+    public ProductResponse updateProduct(
+            String id,
+            UpdateProductRequest request,
+            List<MultipartFile> files) throws IOException {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
         product.setStatus(request.getStatus());
 
-        return productMapper.toProductResponse(productRepository.save(product));
+        if(request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()){
+            product.getImages().removeIf(image -> request.getRemoveImageIds().contains(image.getId()));
+        }
 
+        if (product.getImages().isEmpty()) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
+        }
+
+        if(files != null && !files.isEmpty()){
+            for(MultipartFile file : files){
+                if (!file.isEmpty()) {
+                    Image image = Image.builder()
+                            .imageType(file.getContentType())
+                            .data(file.getBytes())
+                            .product(product)
+                            .build();
+                    product.getImages().add(image);
+                }
+            }
+        }
+
+        return productMapper.toProductResponse(productRepository.save(product));
     }
 
     public CustomPageResponse<ProductResponse> getAll(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
 
-        List<ProductResponse> productResponses = products.getContent()
-                .stream()
-                .map(productMapper::toProductResponse)
-                .toList();
+        List<ProductResponse> productResponses = products.getContent().stream().map(productMapper::toProductResponse).toList();
 
         return CustomPageResponse.<ProductResponse>builder()
                 .pageNumber(products.getNumber())
@@ -98,12 +121,12 @@ public class ProductService {
                 .build();
     }
 
-    public ProductResponse getById(String id){
+    public ProductResponse getById(String id) {
         return productMapper.toProductResponse(productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist!", "product-e-02")));
     }
 
-    public void delete(String id){
+    public void delete(String id) {
         productRepository.deleteById(id);
     }
 }

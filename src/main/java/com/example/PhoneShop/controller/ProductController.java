@@ -30,7 +30,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<ProductResponse>> create(
+    ResponseEntity<ApiResponse<ProductResponse>> create(
             @RequestPart("product") @Valid CreateProductRequest request,
             @RequestPart("files") List<MultipartFile> files) throws IOException {
 
@@ -55,9 +55,21 @@ public class ProductController {
         return productService.getAll(pageable);
     }
 
-    @PutMapping("/{productId}")
-    ProductResponse update(@PathVariable String productId, @Valid @RequestBody UpdateProductRequest request){
-        return productService.updateProduct(productId, request);
+    @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<ApiResponse<ProductResponse>> update(
+            @PathVariable String productId,
+            @RequestPart("product") @Valid UpdateProductRequest request,
+            @RequestPart("files") List<MultipartFile> files) throws IOException {
+
+        ProductResponse productResponse = productService.updateProduct(productId, request, files);
+
+        ApiResponse<ProductResponse> response = ApiResponse.<ProductResponse>builder()
+                .message("Update product successfully")
+                .code("category-s-02")
+                .data(productResponse)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     @GetMapping("/{productId}")

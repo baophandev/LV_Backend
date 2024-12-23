@@ -2,12 +2,10 @@ package com.example.PhoneShop.dto.request;
 
 
 import com.example.PhoneShop.enums.ProductStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,15 +24,10 @@ public class UpdateProductRequest {
     @Size(min = 10, max = 10000, message = "Description must be between 10 and 1000 characters")
     String description;
 
-    @NotBlank(message = "Status can not be blank")
-    @Pattern(regexp = "DRAFT|ACTIVE|BLOCKED", message = "Status must be one of: DRAFT, ACTIVE, BLOCKED")
+    @NotNull(message = "Price can not be null")
+    Integer price;
+
     ProductStatus status;
 
-    @Data
-    public static class ImageDTO{
-        @NotBlank(message = "Image ID is required")
-        String id;
-        String path;
-    }
-
+    List<String> removeImageIds; //Danh sach ID ảnh cần xóa
 }
