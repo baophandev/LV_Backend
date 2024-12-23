@@ -56,33 +56,22 @@ public class ProductController {
         return productService.getAll(pageable);
     }
 
-    @GetMapping("/active")
+    @GetMapping("/status")
     CustomPageResponse<ProductResponse> getActiveProducts(
+            @RequestParam ProductStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size
     ){
         Pageable pageable = PageRequest.of(page, size);
-        return productService.getByStatus(ProductStatus.ACTIVE, pageable);
+        return productService.getByStatus(status, pageable);
     }
 
-    @GetMapping("/category/{categoryId}")
-    CustomPageResponse<ProductResponse> getProductsByCategoryId(
+    @GetMapping("category/{categoryId}")
+    public CustomPageResponse<ProductResponse> getProductsByStatusAndCategory(
+            @RequestParam ProductStatus status,
             @PathVariable String categoryId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        return productService.getByCategoryId(categoryId, pageable);
-    }
-
-    @GetMapping("/active/category/{categoryId}")
-    CustomPageResponse<ProductResponse> getProductsByStatusAndCategoryId(
-            @PathVariable String categoryId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size
-    ){
-        Pageable pageable = PageRequest.of(page, size);
-        return productService.getByStatusAndCategoryId(ProductStatus.ACTIVE, categoryId, pageable);
+            Pageable pageable) {
+        return productService.getByStatusAndCategoryId(status, categoryId, pageable);
     }
 
     @PutMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
