@@ -3,6 +3,7 @@ package com.example.PhoneShop.dto.response;
 
 import com.example.PhoneShop.entities.Category;
 import com.example.PhoneShop.entities.Image;
+import com.example.PhoneShop.entities.ProductVariant;
 import com.example.PhoneShop.enums.ProductStatus;
 import lombok.Data;
 
@@ -22,4 +23,5 @@ public class ProductResponse {
     ProductStatus status;
     List<Image> images = new ArrayList<>();
     Category category;
+    List<ProductVariant> variants = new ArrayList<>();
 }

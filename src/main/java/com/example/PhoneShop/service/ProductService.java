@@ -5,10 +5,7 @@ import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.ProductResponse;
-import com.example.PhoneShop.entities.Category;
-import com.example.PhoneShop.entities.Image;
-import com.example.PhoneShop.entities.Product;
-import com.example.PhoneShop.entities.Review;
+import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.ProductMapper;
@@ -67,6 +64,13 @@ public class ProductService {
         }
         product.setImages(images);
 
+        ProductVariant variant = ProductVariant.builder()
+                .color(request.getColor())
+                .price(request.getPrice())
+                .product(product)
+                .build();
+        product.getVariants().add(variant);
+
         return productMapper.toProductResponse(productRepository.save(product));
 
     }
@@ -89,6 +93,17 @@ public class ProductService {
 
         if (product.getImages().isEmpty()) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
+        }
+
+        if( request.getVariants() != null && !request.getVariants().isEmpty()){
+            for(UpdateProductRequest.ProductVariantDTO variantDTO : request.getVariants()){
+                ProductVariant variant = ProductVariant.builder()
+                        .color(variantDTO.getColor())
+                        .price(variantDTO.getPrice())
+                        .product(product)
+                        .build();
+                product.getVariants().add(variant);
+            }
         }
 
         if(files != null && !files.isEmpty()){

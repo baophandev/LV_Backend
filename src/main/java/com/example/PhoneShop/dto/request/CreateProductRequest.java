@@ -31,4 +31,7 @@ public class CreateProductRequest {
 
     @NotBlank(message = "Category ID is required")
     String categoryId;
+
+    @NotBlank(message = "Color is required")
+    String color;
 }

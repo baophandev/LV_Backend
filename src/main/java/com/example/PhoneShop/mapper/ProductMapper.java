@@ -16,6 +16,7 @@ public interface ProductMapper {
 
 
     @Mapping(target = "price", source = "product.price")
+    @Mapping(target = "variants", source = "product.variants")
     ProductResponse toProductResponse(Product product);
 
 }

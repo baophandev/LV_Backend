@@ -64,4 +64,9 @@ public class Product {
     @JsonManagedReference
     List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
+    List<ProductVariant> variants = new ArrayList<>();
 }

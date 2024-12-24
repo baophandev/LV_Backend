@@ -58,7 +58,7 @@ public class ProductController {
 
     @GetMapping("/status")
     CustomPageResponse<ProductResponse> getActiveProducts(
-            @RequestParam ProductStatus status,
+            @RequestParam(required = false) ProductStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size
     ){
