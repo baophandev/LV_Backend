@@ -68,7 +68,7 @@ public class ProductController {
 
     @GetMapping("category/{categoryId}")
     public CustomPageResponse<ProductResponse> getProductsByStatusAndCategory(
-            @RequestParam ProductStatus status,
+            @RequestParam(required = false) ProductStatus status,
             @PathVariable String categoryId,
             Pageable pageable) {
         return productService.getByStatusAndCategoryId(status, categoryId, pageable);

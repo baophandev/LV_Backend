@@ -138,7 +138,13 @@ public class ProductService {
     }
 
     public CustomPageResponse<ProductResponse> getByStatusAndCategoryId(ProductStatus status, String categoryId, Pageable pageable){
-        Page<Product> products = productRepository.findByStatusAndCategoryId(status, categoryId, pageable);
+        Page<Product> products;
+
+        if(status == null){
+            products = productRepository.findByCategoryId(categoryId, pageable);
+        }else{
+            products = productRepository.findByStatusAndCategoryId(status, categoryId, pageable);
+        }
 
         List<ProductResponse> productResponses = products.getContent()
                 .stream().map(productMapper::toProductResponse).toList();
