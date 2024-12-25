@@ -182,4 +182,19 @@ public class ProductService {
     public void delete(String id) {
         productRepository.deleteById(id);
     }
+
+    public void deleteVariant(String productId, Long variantId){
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-02"));
+        boolean removed = product.getVariants().removeIf(variant -> variant.getId().equals(variantId));
+
+        if(!removed){
+            throw new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-02");
+        }
+
+        if(product.getVariants().isEmpty()){
+            throw  new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one variant", "product-e-03");
+        }
+        productRepository.save(product);
+    }
 }

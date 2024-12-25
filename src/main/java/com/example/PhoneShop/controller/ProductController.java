@@ -101,4 +101,12 @@ public class ProductController {
         productService.delete(productId);
         return "Product has been deleted";
     }
+
+    @DeleteMapping("/variant/{productId}")
+    String deleteVariant(
+            @PathVariable String productId,
+        @RequestParam Long variantId ){
+        productService.deleteVariant(productId, variantId);
+        return "Variant has been deleted";
+    }
 }
