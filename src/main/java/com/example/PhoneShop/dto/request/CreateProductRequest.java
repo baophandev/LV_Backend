@@ -34,4 +34,22 @@ public class CreateProductRequest {
 
     @NotBlank(message = "Color is required")
     String color;
+
+    AttributeDto attributeDto;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class AttributeDto{
+        String os;
+        String cpu;
+        String ram;
+        String rom;
+        String camera;
+        String pin;
+        String sim;
+        String others;
+    }
 }

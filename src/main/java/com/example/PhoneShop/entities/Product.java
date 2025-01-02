@@ -45,6 +45,9 @@ public class Product {
     @Column(name = "prd_created_at")
     LocalDateTime createdAt;
 
+    @Column(name = "prd_related_id")
+    List<String> related_id;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -57,6 +60,12 @@ public class Product {
     @ToString.Exclude
     @JsonManagedReference
     Category category;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
+    Attribute attribute;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
     @EqualsAndHashCode.Exclude

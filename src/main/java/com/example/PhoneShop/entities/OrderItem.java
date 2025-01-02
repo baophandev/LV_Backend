@@ -1,8 +1,6 @@
 package com.example.PhoneShop.entities;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,23 +11,30 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class CartItem {
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_item_id")
+    @Column(name = "order_item_id")
     Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id")
+    @JoinColumn(name = "order_id")
     @JsonBackReference
-    Cart cart;
+    Order order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prd_id", nullable = false)
     @JsonBackReference
     Product product;
 
     @Column(name = "quantity", nullable = false)
     Integer quantity;
+
+    @Column(name = "price_at_order", nullable = false)
+    Integer priceAtOrder;
+
+    public Integer calculateTotalPrice() {
+        return quantity * priceAtOrder;
+    }
 }
