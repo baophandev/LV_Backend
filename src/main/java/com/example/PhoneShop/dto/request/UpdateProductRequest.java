@@ -24,14 +24,13 @@ public class UpdateProductRequest {
     @Size(min = 10, max = 10000, message = "Description must be between 10 and 1000 characters")
     String description;
 
-    @NotNull(message = "Price can not be null")
-    Integer price;
-
     ProductStatus status;
 
     List<String> removeImageIds; //Danh sach ID ảnh cần xóa
 
     List<ProductVariantDTO> variants;
+
+    List<String>  related_id;
 
     @Data
     @NoArgsConstructor

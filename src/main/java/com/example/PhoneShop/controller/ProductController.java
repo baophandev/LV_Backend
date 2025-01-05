@@ -4,20 +4,19 @@ package com.example.PhoneShop.controller;
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
+import com.example.PhoneShop.dto.request.AttributRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
-import com.example.PhoneShop.dto.response.CategoryResponse;
+import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,6 +88,18 @@ public class ProductController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @PutMapping(value = "/{productId}/attribute")
+    AttributeResponse updateProductAttribute(
+            @PathVariable String productId,
+            @RequestBody @Valid AttributRequest request){
+        return productService.updateProductAttribute(productId, request);
+    }
+
+    @GetMapping(value = "/{productId}/attribute")
+    AttributeResponse getAttributeByPrdId(@PathVariable String productId){
+        return productService.getAtrByPrdId(productId);
     }
 
     @GetMapping("/{productId}")

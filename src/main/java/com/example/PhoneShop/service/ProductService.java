@@ -3,14 +3,15 @@ package com.example.PhoneShop.service;
 
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
+import com.example.PhoneShop.dto.request.AttributRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
+import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.ProductMapper;
 import com.example.PhoneShop.repository.CategoryRepository;
-import com.example.PhoneShop.repository.ImageRepository;
 import com.example.PhoneShop.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,6 @@ public class ProductService {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        log.info("Set product price: {}", product.getPrice());
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category not found", "category-e-01"));
 
@@ -64,12 +63,19 @@ public class ProductService {
         }
         product.setImages(images);
 
-        ProductVariant variant = ProductVariant.builder()
-                .color(request.getColor())
-                .price(request.getPrice())
-                .product(product)
-                .build();
-        product.getVariants().add(variant);
+        List<ProductVariant> productVariants = new ArrayList<>();
+
+        if(request.getVariants() != null){
+            for(CreateProductRequest.ProductVariantDTO variantDTO : request.getVariants()){
+                productVariants.add(ProductVariant.builder()
+                                .color(variantDTO.getColor())
+                                .price(variantDTO.getPrice())
+                                .product(product)
+                        .build());
+            }
+        }
+
+        product.setVariants(productVariants);
 
         return productMapper.toProductResponse(productRepository.save(product));
 
@@ -84,8 +90,8 @@ public class ProductService {
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
         product.setStatus(request.getStatus());
+        product.setRelated_id(request.getRelated_id());
 
         if(request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()){
             product.getImages().removeIf(image -> request.getRemoveImageIds().contains(image.getId()));
@@ -120,6 +126,31 @@ public class ProductService {
         }
 
         return productMapper.toProductResponse(productRepository.save(product));
+    }
+
+    public AttributeResponse updateProductAttribute(String prdId, AttributRequest updateProductAtrRequest){
+        Product product = productRepository.findById(prdId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
+
+        Attribute attribute = product.getAttribute();
+        if(attribute == null){
+            attribute = new Attribute();
+            attribute.setProduct(product);
+        }
+        attribute.setOs(updateProductAtrRequest.getOs());
+        attribute.setCpu(updateProductAtrRequest.getCpu());
+        attribute.setRam(updateProductAtrRequest.getRam());
+        attribute.setRom(updateProductAtrRequest.getRom());
+        attribute.setPin(updateProductAtrRequest.getPin());
+        attribute.setCamera(updateProductAtrRequest.getCamera());
+        attribute.setSim(updateProductAtrRequest.getSim());
+        attribute.setOthers(updateProductAtrRequest.getOthers());
+
+        product.setAttribute(attribute);
+
+        Product updatedProduct = productRepository.save(product);
+
+        return productMapper.toAttributeResponse(updatedProduct.getAttribute());
     }
 
     public CustomPageResponse<ProductResponse> getAll(Pageable pageable) {
@@ -177,6 +208,13 @@ public class ProductService {
     public ProductResponse getById(String id) {
         return productMapper.toProductResponse(productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist!", "product-e-02")));
+    }
+
+    public AttributeResponse getAtrByPrdId (String productId){
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
+
+        return productMapper.toAttributeResponse(product.getAttribute());
     }
 
     public void delete(String id) {

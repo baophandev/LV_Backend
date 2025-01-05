@@ -2,6 +2,7 @@ package com.example.PhoneShop.dto.request;
 
 
 import com.example.PhoneShop.enums.ProductStatus;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -26,30 +27,21 @@ public class CreateProductRequest {
     @Size(min = 10, message = "Description must be at least 10 characters")
     String description;
 
-    @NotNull(message = "Price can not be blank")
-    Integer price;
-
     @NotBlank(message = "Category ID is required")
     String categoryId;
 
-    @NotBlank(message = "Color is required")
-    String color;
-
-    AttributeDto attributeDto;
+    List<ProductVariantDTO> variants;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class AttributeDto{
-        String os;
-        String cpu;
-        String ram;
-        String rom;
-        String camera;
-        String pin;
-        String sim;
-        String others;
+    public static class ProductVariantDTO{
+        @NotBlank(message = "Color cannot be blank")
+        String color;
+
+        @NotNull(message = "Price cannot be null")
+        Integer price;
     }
 }

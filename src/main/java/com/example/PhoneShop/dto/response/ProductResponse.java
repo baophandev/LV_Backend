@@ -18,10 +18,10 @@ public class ProductResponse {
     String name;
     String description;
     Double rating;
-    Integer price;
     Integer sold;
     ProductStatus status;
     List<Image> images = new ArrayList<>();
+    List<String> related_id = new ArrayList<>();
     Category category;
     List<ProductVariant> variants = new ArrayList<>();
 }
