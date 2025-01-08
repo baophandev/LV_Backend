@@ -1,13 +1,12 @@
 package com.example.PhoneShop.service;
 
 
-import com.example.PhoneShop.dto.response.CartResponse;
+import com.example.PhoneShop.dto.response.AddToCartResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.CartMapper;
 import com.example.PhoneShop.repository.CartRepository;
-import com.example.PhoneShop.repository.ProductRepository;
 import com.example.PhoneShop.repository.ProductVariantRepository;
 import com.example.PhoneShop.repository.UserRepository;
 import lombok.AccessLevel;
@@ -30,7 +29,7 @@ public class CartService {
     UserRepository userRepository;
     CartMapper cartMapper;
 
-    public CartResponse addProductVariantToCart(String userId, Long variantId, int quantity){
+    public AddToCartResponse addProductVariantToCart(String userId, Long variantId, int quantity){
         if(quantity < 0){
             throw new AppException(HttpStatus.BAD_REQUEST, "Quantity must be greater than zero.");
         }
@@ -73,6 +72,6 @@ public class CartService {
         }
 
         cartRepository.save(cart);
-        return cartMapper.toCartResponse(cart);
+        return cartMapper.toAddToCartResponse(cart);
     }
 }
