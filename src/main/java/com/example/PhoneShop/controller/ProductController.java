@@ -116,7 +116,8 @@ public class ProductController {
     @DeleteMapping("/variant/{productId}")
     String deleteVariant(
             @PathVariable String productId,
-        @RequestParam Long variantId ){
+        @RequestParam Long variantId
+    ){
         productService.deleteVariant(productId, variantId);
         return "Variant has been deleted";
     }

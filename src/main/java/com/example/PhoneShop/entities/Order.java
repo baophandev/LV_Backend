@@ -1,5 +1,6 @@
 package com.example.PhoneShop.entities;
 
+import com.example.PhoneShop.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -38,12 +39,21 @@ public class Order {
     @Column(name = "order_date", nullable = false)
     LocalDateTime orderDate;
 
-    @Column(name = "total_price", nullable = false)
-    Integer totalPrice;
+    @ManyToOne(fetch =  FetchType.LAZY)
+    @JoinColumn(name = "adr_id")
+    Address address;
 
-    public void calculateTotalPrice() {
-        this.totalPrice = items.stream()
-                .mapToInt(OrderItem::calculateTotalPrice)
-                .sum();
-    }
+    @Column(name = "order_note")
+    String note;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
+
+    @Column(name = "order_total_quantity", nullable = false)
+    String totalQuantity;
+
+    @Column(name = "order_total_price", nullable = false)
+    String totalPrice;
+
 }
