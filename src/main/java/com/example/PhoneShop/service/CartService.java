@@ -59,8 +59,8 @@ public class CartService {
 
 
     public AddToCartResponse addProductVariantToCart(String userId, Long variantId, int quantity){
-        if(quantity < 0){
-            throw new AppException(HttpStatus.BAD_REQUEST, "Quantity must be greater than zero.");
+        if(quantity == 0){
+            throw new AppException(HttpStatus.BAD_REQUEST, "Quantity must not be zero.");
         }
 
         ProductVariant variant = productVariantRepository.findById(String.valueOf(variantId))
@@ -90,7 +90,18 @@ public class CartService {
         if(existingCartItem.isPresent()){
             //Update quantity of existing item
             CartItem cartItem = existingCartItem.get();
-            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+
+            int updatedQuantity = cartItem.getQuantity() + quantity;
+
+            if(updatedQuantity < 0){
+                throw  new AppException(HttpStatus.BAD_REQUEST, "Quantity can not be negative.");
+            }
+
+            cartItem.setQuantity(updatedQuantity);
+
+            if(updatedQuantity == 0){
+                cart.removeItem(cartItem);
+            }
         }else {
             CartItem newCartItem = CartItem.builder()
                     .productVariant(variant)
