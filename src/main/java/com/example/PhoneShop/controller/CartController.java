@@ -2,7 +2,9 @@ package com.example.PhoneShop.controller;
 
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.response.AddToCartResponse;
+import com.example.PhoneShop.dto.response.CartResponse;
 import com.example.PhoneShop.service.CartService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,5 +29,18 @@ public class CartController {
                 .data(cartResponse)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    ResponseEntity<ApiResponse<CartResponse>> getAll(
+            @RequestParam String userId
+    ){
+        CartResponse cartResponse = cartService.getAll(userId);
+        ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
+                .code("cart-s-02")
+                .message("Get all product from cart successfully!")
+                .data(cartResponse)
+                .build();
+        return  ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

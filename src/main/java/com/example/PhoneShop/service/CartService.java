@@ -2,6 +2,7 @@ package com.example.PhoneShop.service;
 
 
 import com.example.PhoneShop.dto.response.AddToCartResponse;
+import com.example.PhoneShop.dto.response.CartResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
@@ -17,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -28,6 +31,32 @@ public class CartService {
     ProductVariantRepository productVariantRepository;
     UserRepository userRepository;
     CartMapper cartMapper;
+
+    public CartResponse getAll(String userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "User not found", "user-e-01"));
+
+        Cart cart = cartRepository.findByUserId(userId);
+
+        if(cart == null){
+            throw new AppException(HttpStatus.NOT_FOUND, "cart not found", "cart-e-01");
+        }
+
+        return CartResponse.builder()
+                .id(cart.getId())
+                .userId(user.getId())
+                .items(cart.getItems().stream()
+                        .map(item -> CartResponse.CartItemResponse.builder()
+                                .id(item.getId())
+                                .productVariantId(item.getProductVariant().getId())
+                                .productName(item.getProductVariant().getProduct().getName())
+                                .quantity(item.getQuantity())
+                                .price(item.getProductVariant().getPrice())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
 
     public AddToCartResponse addProductVariantToCart(String userId, Long variantId, int quantity){
         if(quantity < 0){
@@ -74,4 +103,7 @@ public class CartService {
         cartRepository.save(cart);
         return cartMapper.toAddToCartResponse(cart);
     }
+
+
+
 }
