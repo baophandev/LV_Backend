@@ -5,6 +5,7 @@ import com.example.PhoneShop.dto.response.AddToCartResponse;
 import com.example.PhoneShop.dto.response.CartResponse;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.service.CartService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,9 +33,9 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/{userId}")
     ResponseEntity<ApiResponse<CartResponse>> getAll(
-            @RequestParam String userId
+            @PathVariable String userId
     ){
         CartResponse cartResponse = cartService.getAll(userId);
         ApiResponse<CartResponse> response = ApiResponse.<CartResponse>builder()
