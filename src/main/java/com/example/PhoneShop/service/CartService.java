@@ -7,6 +7,7 @@ import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.CartMapper;
+import com.example.PhoneShop.repository.CartItemRepository;
 import com.example.PhoneShop.repository.CartRepository;
 import com.example.PhoneShop.repository.ProductVariantRepository;
 import com.example.PhoneShop.repository.UserRepository;
@@ -31,6 +32,7 @@ public class CartService {
     ProductVariantRepository productVariantRepository;
     UserRepository userRepository;
     CartMapper cartMapper;
+    CartItemRepository cartItemRepository;
 
     public CartResponse getAll(String userId){
         User user = userRepository.findById(userId)
@@ -43,13 +45,14 @@ public class CartService {
         }
 
         return CartResponse.builder()
-                .id(cart.getId())
+                .cartId(cart.getId())
                 .userId(user.getId())
                 .items(cart.getItems().stream()
                         .map(item -> CartResponse.CartItemResponse.builder()
-                                .id(item.getId())
+                                .itemId(item.getId())
                                 .productVariantId(item.getProductVariant().getId())
                                 .productName(item.getProductVariant().getProduct().getName())
+                                .productColor(item.getProductVariant().getColor())
                                 .quantity(item.getQuantity())
                                 .price(item.getProductVariant().getPrice())
                                 .build())
@@ -115,6 +118,14 @@ public class CartService {
         return cartMapper.toAddToCartResponse(cart);
     }
 
+    public void removeCartItem(String userId, Long cartItemId){
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Cart item not found!", "cartItem-e-01"));
 
+        if(!cartItem.getCart().getUser().getId().equals(userId)){
+            throw new AppException(HttpStatus.FORBIDDEN, "You are not authorized to remove this item.", "cartItem-e-02");
+        }
 
+        cartItemRepository.deleteById(cartItemId);
+    }
 }

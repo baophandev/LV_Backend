@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartResponse {
-    String id;
+    String cartId;
     String userId;
     List<CartItemResponse> items;
 
@@ -23,9 +23,10 @@ public class CartResponse {
     @AllArgsConstructor
     @Builder
     public static class CartItemResponse{
-        Long id;
+        Long itemId;
         Long productVariantId;
         String productName;
+        String productColor;
         Integer quantity;
         Integer price;
     }

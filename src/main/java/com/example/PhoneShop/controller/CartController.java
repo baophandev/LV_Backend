@@ -3,6 +3,7 @@ package com.example.PhoneShop.controller;
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.response.AddToCartResponse;
 import com.example.PhoneShop.dto.response.CartResponse;
+import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.service.CartService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,19 @@ public class CartController {
                 .data(cartResponse)
                 .build();
         return  ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("deleteItem")
+    public ResponseEntity<String> removeCartItem(
+            @RequestParam String userId,
+            @RequestParam Long itemId
+    ) {
+        try {
+            // Gọi service để xóa cart item
+            cartService.removeCartItem(userId, itemId);
+            return ResponseEntity.ok("Cart item has been removed.");
+        } catch (AppException ex) {
+            return ResponseEntity.status(HttpStatus.OK).body(ex.getMessage());
+        }
     }
 }
