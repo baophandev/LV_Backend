@@ -23,10 +23,10 @@ public class OrderItem {
     @JsonBackReference
     Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "prd_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "variant_id", nullable = false)
     @JsonBackReference
-    Product product;
+    ProductVariant variant;
 
     @Column(name = "quantity", nullable = false)
     Integer quantity;

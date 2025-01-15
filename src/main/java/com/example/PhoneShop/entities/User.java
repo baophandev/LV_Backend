@@ -52,6 +52,9 @@ public class User {
     String avatar;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
     Set<Order> orders = new HashSet<>();
 
 }

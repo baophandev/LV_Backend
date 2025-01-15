@@ -71,6 +71,8 @@ public class ProductService {
                                 .color(variantDTO.getColor())
                                 .price(variantDTO.getPrice())
                                 .product(product)
+                                .stock(0)
+                                .sold(0)
                         .build());
             }
         }
@@ -107,6 +109,8 @@ public class ProductService {
                         .color(variantDTO.getColor())
                         .price(variantDTO.getPrice())
                         .product(product)
+                        .stock(0)
+                        .sold(0)
                         .build();
                 product.getVariants().add(variant);
             }

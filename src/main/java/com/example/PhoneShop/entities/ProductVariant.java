@@ -26,6 +26,12 @@ public class ProductVariant {
     @Column(name = "variant_price", nullable = false)
     Integer price;
 
+    @Column(name = "variant_stock", nullable = false)
+    Integer stock;
+
+    @Column(name = "variant_sold", nullable = false)
+    Integer sold;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prd_id")
     @JsonBackReference

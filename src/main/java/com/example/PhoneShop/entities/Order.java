@@ -1,5 +1,6 @@
 package com.example.PhoneShop.entities;
 
+import com.example.PhoneShop.enums.OrderMethod;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -19,7 +20,6 @@ import java.util.List;
 @Entity
 @Table(name = "orders")
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "order_id")
@@ -47,7 +47,11 @@ public class Order {
     String note;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "order_method", nullable = false)
+    private OrderMethod method;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false)
     private OrderStatus status;
 
     @Column(name = "order_total_quantity", nullable = false)
@@ -55,5 +59,4 @@ public class Order {
 
     @Column(name = "order_total_price", nullable = false)
     String totalPrice;
-
 }
