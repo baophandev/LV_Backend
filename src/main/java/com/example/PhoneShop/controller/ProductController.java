@@ -5,6 +5,7 @@ import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
@@ -113,6 +114,8 @@ public class ProductController {
         return "Product has been deleted";
     }
 
+
+    //Variant controller
     @DeleteMapping("/variant/{productId}")
     String deleteVariant(
             @PathVariable String productId,
@@ -120,5 +123,12 @@ public class ProductController {
     ){
         productService.deleteVariant(productId, variantId);
         return "Variant has been deleted";
+    }
+
+    @PostMapping("/variant")
+    Long createVariant(
+            @RequestBody @Valid CreateVariantRequest request
+    ){
+        return productService.createProductVariant(request);
     }
 }

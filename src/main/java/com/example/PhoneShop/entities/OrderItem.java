@@ -23,16 +23,26 @@ public class OrderItem {
     @JsonBackReference
     Order order;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "variant_id", nullable = false)
-    @JsonBackReference
-    ProductVariant variant;
+    @Column(name = "order_prd_id", nullable = false)
+    String prdId;
 
-    @Column(name = "quantity", nullable = false)
+    @Column(name = "order_prd_name", nullable = false)
+    String name;
+
+    @Column(name = "order_prd_img", nullable = false)
+    String image;
+
+    @Column(name = "order_prd_color", nullable = false)
+    String color;
+
+    @Column(name = "order_quantity", nullable = false)
     Integer quantity;
 
     @Column(name = "price_at_order", nullable = false)
     Integer priceAtOrder;
+
+    @Column(name = "price_discounted_price")
+    Integer discountedPrice;
 
     public Integer calculateTotalPrice() {
         return quantity * priceAtOrder;

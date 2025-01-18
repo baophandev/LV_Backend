@@ -4,6 +4,7 @@ package com.example.PhoneShop.service;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
@@ -13,6 +14,7 @@ import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.ProductMapper;
 import com.example.PhoneShop.repository.CategoryRepository;
 import com.example.PhoneShop.repository.ProductRepository;
+import com.example.PhoneShop.repository.ProductVariantRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,6 +38,7 @@ public class ProductService {
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
     ProductMapper productMapper;
+    ProductVariantRepository productVariantRepository;
 
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
         Product product = new Product();
@@ -63,22 +66,6 @@ public class ProductService {
         }
         product.setImages(images);
 
-        List<ProductVariant> productVariants = new ArrayList<>();
-
-        if(request.getVariants() != null){
-            for(CreateProductRequest.ProductVariantDTO variantDTO : request.getVariants()){
-                productVariants.add(ProductVariant.builder()
-                                .color(variantDTO.getColor())
-                                .price(variantDTO.getPrice())
-                                .product(product)
-                                .stock(0)
-                                .sold(0)
-                        .build());
-            }
-        }
-
-        product.setVariants(productVariants);
-
         return productMapper.toProductResponse(productRepository.save(product));
 
     }
@@ -101,19 +88,6 @@ public class ProductService {
 
         if (product.getImages().isEmpty()) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
-        }
-
-        if( request.getVariants() != null && !request.getVariants().isEmpty()){
-            for(UpdateProductRequest.ProductVariantDTO variantDTO : request.getVariants()){
-                ProductVariant variant = ProductVariant.builder()
-                        .color(variantDTO.getColor())
-                        .price(variantDTO.getPrice())
-                        .product(product)
-                        .stock(0)
-                        .sold(0)
-                        .build();
-                product.getVariants().add(variant);
-            }
         }
 
         if(files != null && !files.isEmpty()){
@@ -225,9 +199,31 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+
+    /*
+    * Product variant
+    */
+    public Long createProductVariant(CreateVariantRequest request){
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-01"));
+
+        ProductVariant productVariant = ProductVariant.builder()
+                .product(product)
+                .price(request.getPrice())
+                .color(request.getColor())
+                .discount(request.getDiscount())
+                .sold(request.getSold())
+                .stock(request.getStock())
+                .build();
+
+        productVariantRepository.save(productVariant);
+
+        return  productVariant.getId();
+    }
+
     public void deleteVariant(String productId, Long variantId){
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-02"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-01"));
         boolean removed = product.getVariants().removeIf(variant -> variant.getId().equals(variantId));
 
         if(!removed){
@@ -239,4 +235,6 @@ public class ProductService {
         }
         productRepository.save(product);
     }
+
+
 }

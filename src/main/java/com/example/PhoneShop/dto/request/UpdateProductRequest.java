@@ -28,20 +28,6 @@ public class UpdateProductRequest {
 
     List<String> removeImageIds; //Danh sach ID ảnh cần xóa
 
-    List<ProductVariantDTO> variants;
-
     List<String>  related_id;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class ProductVariantDTO{
-        @NotBlank(message = "Color cannot be blank")
-        String color;
-
-        @NotNull(message = "Price cannot be null")
-        Integer price;
-    }
 }

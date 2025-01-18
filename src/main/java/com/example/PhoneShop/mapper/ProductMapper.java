@@ -13,7 +13,6 @@ public interface ProductMapper {
     Product toProduct(CreateProductRequest request);
     AttributeResponse toAttributeResponse(Attribute attribute);
 
-    @Mapping(target = "variants", source = "product.variants")
     ProductResponse toProductResponse(Product product);
 
 }

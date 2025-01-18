@@ -30,18 +30,4 @@ public class CreateProductRequest {
     @NotBlank(message = "Category ID is required")
     String categoryId;
 
-    List<ProductVariantDTO> variants;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class ProductVariantDTO{
-        @NotBlank(message = "Color cannot be blank")
-        String color;
-
-        @NotNull(message = "Price cannot be null")
-        Integer price;
-    }
 }
