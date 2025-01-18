@@ -6,6 +6,7 @@ import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
@@ -131,4 +132,13 @@ public class ProductController {
     ){
         return productService.createProductVariant(request);
     }
+
+    @PutMapping("/variant/{variantId}")
+    String updateVariant(
+            @RequestBody @Valid UpdateVariantRequest request,
+            @PathVariable Long variantId
+            ){
+        return productService.updateProductVariant(variantId, request);
+    }
+
 }

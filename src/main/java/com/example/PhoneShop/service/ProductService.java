@@ -5,6 +5,7 @@ import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
@@ -219,6 +220,21 @@ public class ProductService {
         productVariantRepository.save(productVariant);
 
         return  productVariant.getId();
+    }
+
+    public String updateProductVariant(Long id, UpdateVariantRequest request){
+        ProductVariant productVariant = productVariantRepository.findById(id)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
+
+        productVariant.setSold(request.getSold());
+        productVariant.setDiscount(request.getDiscount());
+        productVariant.setColor(request.getColor());
+        productVariant.setPrice(request.getPrice());
+        productVariant.setStock(request.getStock());
+
+        productVariantRepository.save(productVariant);
+
+        return "Update variant successfully";
     }
 
     public void deleteVariant(String productId, Long variantId){

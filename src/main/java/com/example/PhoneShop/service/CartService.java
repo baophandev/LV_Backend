@@ -68,7 +68,7 @@ public class CartService {
             throw new AppException(HttpStatus.BAD_REQUEST, "Quantity must not be zero.");
         }
 
-        ProductVariant variant = productVariantRepository.findById(String.valueOf(variantId))
+        ProductVariant variant = productVariantRepository.findById(variantId)
                 .orElseThrow( () -> new AppException(HttpStatus.NOT_FOUND, "Product variant not found!", "variant-e-01"));
 
         Product product = variant.getProduct();
