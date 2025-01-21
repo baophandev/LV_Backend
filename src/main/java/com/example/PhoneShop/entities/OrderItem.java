@@ -29,20 +29,23 @@ public class OrderItem {
     @Column(name = "order_prd_name", nullable = false)
     String name;
 
-    @Column(name = "order_prd_img", nullable = false)
-    String image;
-
     @Column(name = "order_prd_color", nullable = false)
     String color;
 
     @Column(name = "order_quantity", nullable = false)
-    Integer quantity;
+    Integer quantity = 0;
 
     @Column(name = "price_at_order", nullable = false)
-    Integer priceAtOrder;
+    Integer priceAtOrder = 0;
 
-    @Column(name = "price_discounted_price")
-    Integer discountedPrice;
+    @Column(name = "product_discount", nullable = false)
+    Integer discount = 0;
+
+    @Column(name = "price_discounted")
+    Integer discountedPrice = 0;
+
+    @Column(name = "price_calculate")
+    Integer calculatePrice = 0;
 
     public Integer calculateTotalPrice() {
         return quantity * priceAtOrder;

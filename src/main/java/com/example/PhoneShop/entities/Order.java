@@ -55,8 +55,8 @@ public class Order {
     private OrderStatus status;
 
     @Column(name = "order_total_quantity", nullable = false)
-    String totalQuantity;
+    Integer totalQuantity;
 
     @Column(name = "order_total_price", nullable = false)
-    String totalPrice;
+    Integer totalPrice;
 }
