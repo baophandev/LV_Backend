@@ -1,16 +1,20 @@
 package com.example.PhoneShop.service;
 
+import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
 import com.example.PhoneShop.dto.response.OrderResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
+import com.example.PhoneShop.mapper.OrderMapper;
 import com.example.PhoneShop.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +31,7 @@ public class OrderService {
     UserRepository userRepository;
     OrderRepository orderRepository;
     AddressRepository addressRepository;
+    OrderMapper orderMapper;
 
     public OrderResponse create(String userId, CreateOrderRequest request){
         User user = userRepository.findById(userId)
@@ -108,6 +113,49 @@ public class OrderService {
                 .totalQuantity(order.getTotalQuantity())
                 .totalPrice(order.getTotalPrice())
                 .build();
+    }
+
+    public CustomPageResponse<OrderResponse> getByStatus(String userId, OrderStatus status, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "User not found", "user-e-01"));
+
+        Page<Order> orders;
+
+        if (status != null) {
+            orders = orderRepository.findByUserIdAndStatus(userId, status, pageable);
+        } else {
+            orders = orderRepository.findByUserId(userId, pageable);
+        }
+
+        List<OrderResponse> orderResponses = orders.getContent()
+                .stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+
+        return CustomPageResponse.<OrderResponse>builder()
+                .pageNumber(orders.getNumber())
+                .totalElements(orders.getTotalElements())
+                .totalPages(orders.getTotalPages())
+                .pageSize(orders.getSize())
+                .content(orderResponses)
+                .build();
+    }
+
+    public OrderResponse getOrderById(String orderId){
+        return orderMapper.toOrderResponse(orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Order does not exist"))
+        );
+    }
+
+    public OrderResponse updateOrderStatus(String orderId, OrderStatus orderStatus){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "Order not found"));
+
+        order.setStatus(orderStatus);
+
+        orderRepository.save(order);
+
+        return orderMapper.toOrderResponse(order);
     }
 
 }
