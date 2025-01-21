@@ -58,4 +58,6 @@ public class User {
     @JsonManagedReference
     Set<Order> orders = new HashSet<>();
 
+    @ManyToMany
+    Set<Role> roles;
 }
