@@ -26,22 +26,26 @@ public class OrderService {
     CartItemRepository  cartItemRepository;
     UserRepository userRepository;
     OrderRepository orderRepository;
+    AddressRepository addressRepository;
 
     public OrderResponse create(String userId, CreateOrderRequest request){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "User not found", "user-e-01"));
 
-//        Address address = addressRepository.findById(request.getAddressId())
-//                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Address not found", "address-e-01"));
-//
+        Address address = addressRepository.findById(request.getAddressId())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Address not found", "address-e-01"));
+
+        String addressString =address.getDetail() + (", ") + address.getWard() + (", ") + address.getDistrict() + (", ") + address.getProvince();
 
         int totalQuantity = 0;
         int totalPrice = 0;
 
         Order order = Order.builder()
-                .user(user)
+                .userId(user.getId())
+                .receiverName(address.getReceiverName())
+                .receiverPhone(address.getReceiverPhone())
+                .address(addressString)
                 .orderDate(LocalDateTime.now())
-//                .address(address)
                 .note(request.getNote())
                 .method(request.getMethod())
                 .status(OrderStatus.PENDING)
@@ -92,7 +96,9 @@ public class OrderService {
 
         return OrderResponse.builder()
                 .orderId(order.getId())
-                .userId(order.getUser().getId())
+                .userId(order.getUserId())
+                .receiverName(order.getReceiverName())
+                .receiverPhone(order.getReceiverPhone())
                 .items(order.getItems())
                 .orderDate(order.getOrderDate())
                 .address(order.getAddress())

@@ -2,6 +2,7 @@ package com.example.PhoneShop.dto.response;
 
 
 import com.example.PhoneShop.entities.Address;
+import com.example.PhoneShop.entities.Order;
 import com.example.PhoneShop.entities.OrderItem;
 import com.example.PhoneShop.entities.User;
 import com.example.PhoneShop.enums.OrderMethod;
@@ -22,9 +23,11 @@ import java.util.List;
 public class OrderResponse {
     String orderId;
     String userId;
+    String receiverName;
+    String receiverPhone;
+    String address;
     List<OrderItem> items = new ArrayList<>();
     LocalDateTime orderDate;
-    Address address;
     String note;
     OrderMethod method;
     OrderStatus status;

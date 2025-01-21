@@ -25,10 +25,17 @@ public class Order {
     @Column(name = "order_id")
     String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
-    User user;
+    @Column(name = "order_user_id", nullable = false)
+    String userId;
+
+    @Column(name = "order_user_name", nullable = false)
+    String receiverName;
+
+    @Column(name = "order_user_phone", nullable = false)
+    String receiverPhone;
+
+    @Column(name = "order_address", nullable = false)
+    String address;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "order", orphanRemoval = true, fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude
@@ -38,10 +45,6 @@ public class Order {
 
     @Column(name = "order_date", nullable = false)
     LocalDateTime orderDate;
-
-    @ManyToOne(fetch =  FetchType.LAZY)
-    @JoinColumn(name = "adr_id")
-    Address address;
 
     @Column(name = "order_note")
     String note;
@@ -59,4 +62,9 @@ public class Order {
 
     @Column(name = "order_total_price", nullable = false)
     Integer totalPrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
+    @JoinColumn(name = "user_id")
+    User user;
 }
