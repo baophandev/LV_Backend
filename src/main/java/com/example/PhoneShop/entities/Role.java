@@ -3,7 +3,7 @@ package com.example.PhoneShop.entities;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,6 +18,4 @@ public class Role {
     @Id
     String name;
     String description;
-    @ManyToMany
-    Set<Permission> permissions;
 }

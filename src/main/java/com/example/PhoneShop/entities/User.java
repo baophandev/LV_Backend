@@ -49,8 +49,11 @@ public class User {
     @JsonManagedReference
     Cart cart;
 
-    @Column(name = "user_avatar")
-    String avatar;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
+    Avatar avatar;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     @EqualsAndHashCode.Exclude
@@ -58,6 +61,10 @@ public class User {
     @JsonManagedReference
     Set<Order> orders = new HashSet<>();
 
-    @ManyToMany
-    Set<Role> roles;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_name")
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
+    Role role;
 }

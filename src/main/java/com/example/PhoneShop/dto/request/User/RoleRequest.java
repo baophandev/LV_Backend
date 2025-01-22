@@ -1,18 +1,17 @@
-package com.example.PhoneShop.entities;
+package com.example.PhoneShop.dto.request.User;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity
-public class Permission {
-    @Id
+public class RoleRequest {
     String name;
     String description;
+    Set<String> permissions;
 }

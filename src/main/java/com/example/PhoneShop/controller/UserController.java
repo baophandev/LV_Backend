@@ -1,0 +1,38 @@
+package com.example.PhoneShop.controller;
+
+import com.example.PhoneShop.dto.api.ApiResponse;
+import com.example.PhoneShop.dto.request.User.CreateUserRequest;
+import com.example.PhoneShop.dto.response.UserResponse;
+import com.example.PhoneShop.service.UserService;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+
+@RestController
+@RequestMapping("/user")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
+public class UserController {
+    UserService userService;
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<UserResponse> createUser(
+            @RequestPart("user") @Valid CreateUserRequest request,
+            @RequestPart("avatar") MultipartFile file
+            ) throws IOException {
+        return ApiResponse.<UserResponse>builder()
+                .message("User created")
+                .code("user-s-01")
+                .data(userService.createUser(request, file))
+                .build();
+    }
+}
