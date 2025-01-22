@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class CartService {
     CartMapper cartMapper;
     CartItemRepository cartItemRepository;
 
+    @PreAuthorize("hasAnyRole('USER')")
     public CartResponse getAll(String userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "User not found", "user-e-01"));
@@ -63,6 +65,7 @@ public class CartService {
     }
 
 
+    @PreAuthorize("hasAnyRole('USER')")
     public AddToCartResponse addProductVariantToCart(String userId, Long variantId, int quantity){
         if(quantity == 0){
             throw new AppException(HttpStatus.BAD_REQUEST, "Quantity must not be zero.");
@@ -120,6 +123,7 @@ public class CartService {
         return cartMapper.toAddToCartResponse(cart);
     }
 
+    @PreAuthorize("hasAnyRole('USER')")
     public void removeCartItem(String userId, Long cartItemId){
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Cart item not found!", "cartItem-e-01"));

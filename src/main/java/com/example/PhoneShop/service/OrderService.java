@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class OrderService {
     AddressRepository addressRepository;
     OrderMapper orderMapper;
 
+    @PreAuthorize("hasAnyRole('USER')")
     public OrderResponse create(String userId, CreateOrderRequest request){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "User not found", "user-e-01"));
@@ -115,6 +117,7 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EMPLOYEE')")
     public CustomPageResponse<OrderResponse> getByStatus(String userId, OrderStatus status, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "User not found", "user-e-01"));
@@ -141,12 +144,14 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EMPLOYEE')")
     public OrderResponse getOrderById(String orderId){
         return orderMapper.toOrderResponse(orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Order does not exist"))
         );
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EMPLOYEE')")
     public OrderResponse updateOrderStatus(String orderId, OrderStatus orderStatus){
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "Order not found"));

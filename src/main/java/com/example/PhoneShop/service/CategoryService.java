@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class CategoryService {
     CategoryRepository categoryRepository;
     CategoryMapper categoryMapper;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public CategoryResponse create(CreateCategoryRequest request){
 
         if(categoryRepository.existsByName(request.getName())){
@@ -41,6 +43,7 @@ public class CategoryService {
         return categories.stream().map(categoryMapper::toCategoryResponse).toList();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public void delete(String id){
         categoryRepository.deleteById(id);
     }

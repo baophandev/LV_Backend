@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,7 @@ public class ProductService {
     ProductMapper productMapper;
     ProductVariantRepository productVariantRepository;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
         Product product = new Product();
         product.setName(request.getName());
@@ -71,6 +73,7 @@ public class ProductService {
 
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse updateProduct(
             String id,
             UpdateProductRequest request,
@@ -107,6 +110,7 @@ public class ProductService {
         return productMapper.toProductResponse(productRepository.save(product));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public AttributeResponse updateProductAttribute(String prdId, AttributRequest updateProductAtrRequest){
         Product product = productRepository.findById(prdId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
@@ -196,6 +200,7 @@ public class ProductService {
         return productMapper.toAttributeResponse(product.getAttribute());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public void delete(String id) {
         productRepository.deleteById(id);
     }
@@ -204,6 +209,7 @@ public class ProductService {
     /*
     * Product variant
     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public Long createProductVariant(CreateVariantRequest request){
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-01"));
@@ -222,6 +228,7 @@ public class ProductService {
         return  productVariant.getId();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public String updateProductVariant(Long id, UpdateVariantRequest request){
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
@@ -237,6 +244,7 @@ public class ProductService {
         return "Update variant successfully";
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public void deleteVariant(String productId, Long variantId){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-01"));
