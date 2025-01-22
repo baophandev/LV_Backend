@@ -1,5 +1,6 @@
 package com.example.PhoneShop.service;
 
+import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.User.CreateUserRequest;
 import com.example.PhoneShop.dto.response.UserResponse;
 import com.example.PhoneShop.entities.Avatar;
@@ -15,13 +16,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -38,7 +44,7 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        user.setRole(roleRepository.findById("USER").orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")));
+        user.setRole(roleRepository.findById(String.valueOf(UserRole.USER)).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")));
 
         Avatar avatar = Avatar.builder()
                 .imageType(file.getContentType())
@@ -56,5 +62,29 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    public CustomPageResponse<UserResponse> getAll(Pageable pageable){
+        Page<User> users = userRepository.findAll(pageable);
+
+        List<UserResponse> userResponses = users.getContent()
+                .stream().map(userMapper::toUserResponse).toList();
+
+        return  CustomPageResponse.<UserResponse>builder()
+                .pageNumber(users.getNumber())
+                .pageSize(users.getSize())
+                .totalPages(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .content(userResponses)
+                .build();
+    }
+
+    public  UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+
+        User user = userRepository.findById(name).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not existed"));
+
+        return userMapper.toUserResponse(user);
+    }
 
 }

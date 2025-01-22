@@ -1,7 +1,9 @@
 package com.example.PhoneShop.controller;
 
 import com.example.PhoneShop.dto.api.ApiResponse;
+import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.User.CreateUserRequest;
+import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.dto.response.UserResponse;
 import com.example.PhoneShop.service.UserService;
 import jakarta.validation.Valid;
@@ -9,8 +11,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,5 +39,20 @@ public class UserController {
                 .code("user-s-01")
                 .data(userService.createUser(request, file))
                 .build();
+    }
+
+
+    @GetMapping
+    CustomPageResponse<UserResponse> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        return userService.getAll(pageable);
+    }
+
+    @GetMapping("/myInfo")
+    UserResponse getUser(){
+        return userService.getMyInfo();
     }
 }
