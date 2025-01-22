@@ -3,6 +3,7 @@ package com.example.PhoneShop.controller;
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.request.User.AuthenticationRequest;
 import com.example.PhoneShop.dto.request.User.IntrospectRequest;
+import com.example.PhoneShop.dto.request.User.LogoutRequest;
 import com.example.PhoneShop.dto.response.AuthenticationResponse;
 import com.example.PhoneShop.dto.response.IntrospectResponse;
 import com.example.PhoneShop.service.AuthenticationService;
@@ -45,5 +46,11 @@ public class AuthenticationController {
                 .message("Token is valid")
                 .data(result)
                 .build();
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+        authenticationService.logout(request);
+        return  ApiResponse.<Void>builder().build();
     }
 }

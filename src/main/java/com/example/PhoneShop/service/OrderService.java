@@ -151,7 +151,7 @@ public class OrderService {
         );
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public OrderResponse updateOrderStatus(String orderId, OrderStatus orderStatus){
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "Order not found"));
