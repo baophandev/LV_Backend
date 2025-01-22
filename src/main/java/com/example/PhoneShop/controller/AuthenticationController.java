@@ -4,6 +4,7 @@ import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.request.User.AuthenticationRequest;
 import com.example.PhoneShop.dto.request.User.IntrospectRequest;
 import com.example.PhoneShop.dto.request.User.LogoutRequest;
+import com.example.PhoneShop.dto.request.User.RefreshRequest;
 import com.example.PhoneShop.dto.response.AuthenticationResponse;
 import com.example.PhoneShop.dto.response.IntrospectResponse;
 import com.example.PhoneShop.service.AuthenticationService;
@@ -31,6 +32,16 @@ public class AuthenticationController {
     @PostMapping("/token")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
         var result = authenticationService.authenticate(request);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code("auth-s-01")
+                .message("Authenticated!")
+                .data(result)
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(request);
         return ApiResponse.<AuthenticationResponse>builder()
                 .code("auth-s-01")
                 .message("Authenticated!")

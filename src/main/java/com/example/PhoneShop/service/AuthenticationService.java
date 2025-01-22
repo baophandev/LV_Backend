@@ -3,6 +3,7 @@ package com.example.PhoneShop.service;
 import com.example.PhoneShop.dto.request.User.AuthenticationRequest;
 import com.example.PhoneShop.dto.request.User.IntrospectRequest;
 import com.example.PhoneShop.dto.request.User.LogoutRequest;
+import com.example.PhoneShop.dto.request.User.RefreshRequest;
 import com.example.PhoneShop.dto.response.AuthenticationResponse;
 import com.example.PhoneShop.dto.response.IntrospectResponse;
 import com.example.PhoneShop.entities.InvalidatedToken;
@@ -120,6 +121,31 @@ public class AuthenticationService {
                 .build();
 
         invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedJwt = verifyToken(request.getToken());
+
+        var jit = signedJwt.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJwt.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var id = signedJwt.getJWTClaimsSet().getSubject();
+
+        var user = userRepository.findById(id).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found!"));
+
+        var token  = generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
     }
 
     private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
