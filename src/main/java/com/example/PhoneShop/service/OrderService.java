@@ -33,6 +33,7 @@ public class OrderService {
     OrderRepository orderRepository;
     AddressRepository addressRepository;
     OrderMapper orderMapper;
+    ProductVariantRepository productVariantRepository;
 
     @PreAuthorize("hasAnyRole('USER')")
     public OrderResponse create(String userId, CreateOrderRequest request){
@@ -65,6 +66,9 @@ public class OrderService {
             CartItem item = cartItemRepository.findById(itemId)
                     .orElseThrow( () -> new AppException(HttpStatus.NOT_FOUND, "Cart item not found", "CartItem-e-01"));
 
+            ProductVariant productVariant = productVariantRepository.findById(item.getProductVariant().getId())
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found!"));
+
             if(item.getProductVariant().getProduct().getStatus() != ProductStatus.ACTIVE){
                 throw new AppException(HttpStatus.BAD_REQUEST, "Product is not available for purchase");
             }
@@ -92,8 +96,16 @@ public class OrderService {
                     .calculatePrice(calculatePrice)
                     .build();
 
-
             orderItems.add(orderItem);
+
+            //Xóa sản phẩm khỏi giỏ haàng
+            cartItemRepository.deleteById(itemId);
+
+            //Giảm hang trong kho
+            int productVariantStock = productVariant.getStock() - item.getQuantity();
+            productVariant.setStock(productVariantStock);
+            productVariantRepository.save(productVariant);
+
         }
 
         order.setItems(orderItems);
