@@ -41,6 +41,17 @@ public class UserController {
                 .build();
     }
 
+    @PostMapping(value = "/employee",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<UserResponse> createUserEmployee(
+            @RequestPart("user") @Valid CreateUserRequest request,
+            @RequestPart("avatar") MultipartFile file
+    ) throws IOException {
+        return ApiResponse.<UserResponse>builder()
+                .message("User created")
+                .code("user-s-01")
+                .data(userService.createUserEmployee(request, file))
+                .build();
+    }
 
     @GetMapping
     CustomPageResponse<UserResponse> getAll(

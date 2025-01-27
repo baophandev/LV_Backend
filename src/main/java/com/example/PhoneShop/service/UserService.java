@@ -63,6 +63,30 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse createUserEmployee(CreateUserRequest request, MultipartFile file) throws IOException {
+        User user = userMapper.toUser(request);
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        user.setRole(roleRepository.findById(String.valueOf(UserRole.EMPLOYEE)).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")));
+
+        Avatar avatar = Avatar.builder()
+                .imageType(file.getContentType())
+                .data(file.getBytes())
+                .user(user)
+                .build();
+        user.setAvatar(avatar);
+
+        try {
+            user = userRepository.save(user);
+        }catch (DataIntegrityViolationException exception){
+            throw new AppException(HttpStatus.BAD_REQUEST, "User existed! Please check your phone number or email");
+        }
+
+        return userMapper.toUserResponse(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     public CustomPageResponse<UserResponse> getAll(Pageable pageable){
         Page<User> users = userRepository.findAll(pageable);
 
