@@ -73,6 +73,11 @@ public class OrderService {
                 throw new AppException(HttpStatus.BAD_REQUEST, "Product is not available for purchase");
             }
 
+            if(item.getQuantity() > productVariant.getStock()){
+                throw  new AppException(HttpStatus.BAD_REQUEST, "Product is not enough!", "product-e-02");
+            }
+
+
             // Chuyển giảm giá từ phần trăm sang số thập phân
             double discountRate = item.getProductVariant().getDiscount() / 100.0; // 10 -> 0.1
             int discountedPrice = (int) Math.round(item.getProductVariant().getPrice() * (1 - discountRate));
@@ -98,14 +103,16 @@ public class OrderService {
 
             orderItems.add(orderItem);
 
-            //Xóa sản phẩm khỏi giỏ haàng
+            //Xóa sản phẩm khỏi giỏ hàng
             cartItemRepository.deleteById(itemId);
 
             //Giảm hang trong kho
             int productVariantStock = productVariant.getStock() - item.getQuantity();
+            //Tăng so luong da ban
+            int productVariantSold = productVariant.getSold() + item.getQuantity();
             productVariant.setStock(productVariantStock);
+            productVariant.setSold(productVariantSold);
             productVariantRepository.save(productVariant);
-
         }
 
         order.setItems(orderItems);

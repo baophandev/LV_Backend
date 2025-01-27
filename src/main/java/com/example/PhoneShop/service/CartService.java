@@ -76,11 +76,14 @@ public class CartService {
 
         Product product = variant.getProduct();
         if(product.getStatus() != ProductStatus.ACTIVE) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Product is not available for purchase");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Product is not available for purchase", "product-e-03");
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User is not existed!", "product-e-01"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User is not existed!", "user-e-01"));
+
+        if(quantity > variant.getStock())
+            throw  new AppException(HttpStatus.BAD_REQUEST, "Product is not enough!", "product-e-02");
 
         Cart cart = cartRepository.findByUserId(userId);
         if(cart == null){
