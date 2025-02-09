@@ -4,16 +4,20 @@ package com.example.PhoneShop.service;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.CreateDiscountRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
+import com.example.PhoneShop.dto.response.DiscountResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
+import com.example.PhoneShop.mapper.DiscountMapper;
 import com.example.PhoneShop.mapper.ProductMapper;
 import com.example.PhoneShop.repository.CategoryRepository;
+import com.example.PhoneShop.repository.DiscountRepository;
 import com.example.PhoneShop.repository.ProductRepository;
 import com.example.PhoneShop.repository.ProductVariantRepository;
 import lombok.AccessLevel;
@@ -41,6 +45,8 @@ public class ProductService {
     CategoryRepository categoryRepository;
     ProductMapper productMapper;
     ProductVariantRepository productVariantRepository;
+    DiscountRepository discountRepository;
+    DiscountMapper discountMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
@@ -218,8 +224,8 @@ public class ProductService {
                 .product(product)
                 .price(request.getPrice())
                 .color(request.getColor())
-                .discount(request.getDiscount())
-                .sold(request.getSold())
+                .discount(0)
+                .sold(0)
                 .stock(request.getStock())
                 .build();
 
@@ -234,7 +240,6 @@ public class ProductService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
 
         productVariant.setSold(request.getSold());
-        productVariant.setDiscount(request.getDiscount());
         productVariant.setColor(request.getColor());
         productVariant.setPrice(request.getPrice());
         productVariant.setStock(request.getStock());
@@ -260,5 +265,18 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public DiscountResponse createDiscount(CreateDiscountRequest request){
+        ProductVariant productVariant = productVariantRepository.findById(request.getVariantId())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
 
+        Discount discount = Discount.builder()
+                .discountValue(request.getDiscountValue())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .productVariant(productVariant)
+                .build();
+
+        return discountMapper.toDiscountResponse(discountRepository.save(discount));
+    }
 }

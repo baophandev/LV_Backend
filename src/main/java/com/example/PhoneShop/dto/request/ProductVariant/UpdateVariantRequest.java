@@ -22,7 +22,4 @@ public class UpdateVariantRequest {
 
     @NotNull(message = "Sold cannot be blank")
     Integer sold;
-
-    @NotNull(message = "Discount cannot be blank")
-    Integer discount;
 }

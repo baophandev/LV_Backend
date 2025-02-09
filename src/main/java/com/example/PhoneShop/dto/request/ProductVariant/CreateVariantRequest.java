@@ -21,11 +21,11 @@ public class CreateVariantRequest {
     @NotNull(message = "Stock cannot be blank")
     Integer stock;
 
-    @NotNull(message = "Sold cannot be blank")
-    Integer sold;
+//    @NotNull(message = "Sold cannot be blank")
+//    Integer sold;
 
-    @NotNull(message = "Discount cannot be blank")
-    Integer discount;
+//    @NotNull(message = "Discount cannot be blank")
+//    Integer discount;
 
     @NotBlank(message = "Product id cannot be blank")
     String productId;

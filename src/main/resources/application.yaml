@@ -8,7 +8,7 @@ server:
 
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/phone_service}
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/phone_service_draft}
     username: root
     password: sa2023
   jpa:
