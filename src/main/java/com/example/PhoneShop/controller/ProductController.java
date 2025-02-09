@@ -148,4 +148,13 @@ public class ProductController {
         return productService.createDiscount(request);
     }
 
+    @GetMapping("/discount/getActive/{variantId}")
+    DiscountResponse getActiveDiscount(@PathVariable Long variantId){
+        return productService.getActiveDiscount(variantId);
+    }
+
+    @GetMapping("/discount/getAll/{variantId}")
+    List<DiscountResponse> getAllDiscount(@PathVariable Long variantId){
+        return productService.getAllDiscountsByVariant(variantId);
+    }
 }

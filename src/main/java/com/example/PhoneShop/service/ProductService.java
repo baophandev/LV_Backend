@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -278,5 +280,41 @@ public class ProductService {
                 .build();
 
         return discountMapper.toDiscountResponse(discountRepository.save(discount));
+    }
+
+    public DiscountResponse getActiveDiscount(Long variantId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        Optional<Discount> discountOptional = discountRepository
+                .findFirstByProductVariant_IdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(
+                        variantId, now, now);
+
+        if (discountOptional.isPresent()) {
+            Discount discount = discountOptional.get();
+            return DiscountResponse.builder()
+                    .discountId(discount.getId())
+                    .discountValue(discount.getDiscountValue())
+                    .startDate(discount.getStartDate())
+                    .endDate(discount.getEndDate())
+                    // Lấy variantId từ đối tượng ProductVariant (giả sử id là kiểu Long)
+                    .variantId(discount.getProductVariant().getId())
+                    .build();
+        }
+
+        // Nếu không có discount nào còn hiệu lực, trả về discountValue = 0 (các trường khác có thể là null)
+        return DiscountResponse.builder()
+                .discountId(null)
+                .discountValue(0)
+                .startDate(null)
+                .endDate(null)
+                .variantId(variantId)
+                .build();
+    }
+
+    public List<DiscountResponse> getAllDiscountsByVariant(Long variantId) {
+        List<Discount> discounts = discountRepository.findByProductVariant_Id(variantId);
+        return discounts.stream()
+                .map(discountMapper::toDiscountResponse)
+                .collect(Collectors.toList());
     }
 }
