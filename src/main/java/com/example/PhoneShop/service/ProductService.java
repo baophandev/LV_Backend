@@ -4,18 +4,19 @@ package com.example.PhoneShop.service;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.CreateDiscountRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
+import com.example.PhoneShop.dto.response.DiscountResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
+import com.example.PhoneShop.mapper.DiscountMapper;
 import com.example.PhoneShop.mapper.ProductMapper;
-import com.example.PhoneShop.repository.CategoryRepository;
-import com.example.PhoneShop.repository.ProductRepository;
-import com.example.PhoneShop.repository.ProductVariantRepository;
+import com.example.PhoneShop.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,6 +32,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,6 +44,9 @@ public class ProductService {
     CategoryRepository categoryRepository;
     ProductMapper productMapper;
     ProductVariantRepository productVariantRepository;
+    DiscountRepository discountRepository;
+    DiscountMapper discountMapper;
+    PriceHistoryRepository priceHistoryRepository;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
@@ -218,8 +224,8 @@ public class ProductService {
                 .product(product)
                 .price(request.getPrice())
                 .color(request.getColor())
-                .discount(request.getDiscount())
-                .sold(request.getSold())
+                .discount(0)
+                .sold(0)
                 .stock(request.getStock())
                 .build();
 
@@ -234,13 +240,33 @@ public class ProductService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
 
         productVariant.setSold(request.getSold());
-        productVariant.setDiscount(request.getDiscount());
         productVariant.setColor(request.getColor());
         productVariant.setPrice(request.getPrice());
         productVariant.setStock(request.getStock());
 
-        productVariantRepository.save(productVariant);
+        LocalDateTime updateTime = LocalDateTime.now();
+        Optional<PriceHistory> currPriceHistoryOpt = priceHistoryRepository
+                .findCurrentPriceHistoryByProductVariantId(id);
 
+        productVariantRepository.save(productVariant);
+        if (currPriceHistoryOpt.isPresent()){
+            PriceHistory currPriceHistory = currPriceHistoryOpt.get();
+
+            //Nếu endDate chưa được set, tức đây là giá hiện tại
+            if(currPriceHistory.getEndDate() == null){
+                currPriceHistory.setEndDate(updateTime);
+                priceHistoryRepository.save(currPriceHistory);
+            }
+        }
+
+        PriceHistory newPriceHistory = PriceHistory.builder()
+                .productVariant(productVariant)
+                .price(productVariant.getPrice())
+                .startDate(updateTime)
+                .endDate(null)
+                .build();
+
+        priceHistoryRepository.save(newPriceHistory);
         return "Update variant successfully";
     }
 
@@ -260,5 +286,54 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public DiscountResponse createDiscount(CreateDiscountRequest request){
+        ProductVariant productVariant = productVariantRepository.findById(request.getVariantId())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
 
+        Discount discount = Discount.builder()
+                .discountValue(request.getDiscountValue())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .productVariant(productVariant)
+                .build();
+
+        return discountMapper.toDiscountResponse(discountRepository.save(discount));
+    }
+
+    public DiscountResponse getActiveDiscount(Long variantId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        Optional<Discount> discountOptional = discountRepository
+                .findFirstByProductVariant_IdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(
+                        variantId, now, now);
+
+        if (discountOptional.isPresent()) {
+            Discount discount = discountOptional.get();
+            return DiscountResponse.builder()
+                    .discountId(discount.getId())
+                    .discountValue(discount.getDiscountValue())
+                    .startDate(discount.getStartDate())
+                    .endDate(discount.getEndDate())
+                    // Lấy variantId từ đối tượng ProductVariant (giả sử id là kiểu Long)
+                    .variantId(discount.getProductVariant().getId())
+                    .build();
+        }
+
+        // Nếu không có discount nào còn hiệu lực, trả về discountValue = 0 (các trường khác có thể là null)
+        return DiscountResponse.builder()
+                .discountId(null)
+                .discountValue(0)
+                .startDate(null)
+                .endDate(null)
+                .variantId(variantId)
+                .build();
+    }
+
+    public List<DiscountResponse> getAllDiscountsByVariant(Long variantId) {
+        List<Discount> discounts = discountRepository.findByProductVariant_Id(variantId);
+        return discounts.stream()
+                .map(discountMapper::toDiscountResponse)
+                .collect(Collectors.toList());
+    }
 }

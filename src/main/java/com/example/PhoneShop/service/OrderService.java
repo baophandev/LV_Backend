@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -34,6 +35,7 @@ public class OrderService {
     AddressRepository addressRepository;
     OrderMapper orderMapper;
     ProductVariantRepository productVariantRepository;
+    DiscountRepository discountRepository;
 
     @PreAuthorize("hasAnyRole('USER')")
     public OrderResponse create(String userId, CreateOrderRequest request){
@@ -47,6 +49,8 @@ public class OrderService {
 
         int totalQuantity = 0;
         int totalPrice = 0;
+
+        LocalDateTime currTime = LocalDateTime.now();
 
         Order order = Order.builder()
                 .userId(user.getId())
@@ -77,9 +81,21 @@ public class OrderService {
                 throw  new AppException(HttpStatus.BAD_REQUEST, "Product is not enough!", "product-e-02");
             }
 
+            //Lấy discount ừ DiscountRepository nếu có discount còn hạn cho productVariant
+            Optional<Discount> discountOpt = discountRepository
+                    .findFirstByProductVariant_IdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(
+                            productVariant.getId(), currTime, currTime);
 
-            // Chuyển giảm giá từ phần trăm sang số thập phân
-            double discountRate = item.getProductVariant().getDiscount() / 100.0; // 10 -> 0.1
+            //Nếu có discount hợp lệ thì sử dụng discount đó, nếu không thì dùng discount trong product variant
+            int discountPercent;
+            if(discountOpt.isPresent()){
+                discountPercent = discountOpt.get().getDiscountValue();
+            }else {
+                discountPercent = item.getProductVariant().getDiscount();
+            }
+
+            // Chuyển đổi discont từ phần trăm sang số thaập pha và tính giá sau discount
+            double discountRate = discountPercent / 100.0; // 10 -> 0.1
             int discountedPrice = (int) Math.round(item.getProductVariant().getPrice() * (1 - discountRate));
 
             // Tính tổng tiền cho sản phẩm
@@ -95,7 +111,7 @@ public class OrderService {
                     .name(item.getProductVariant().getProduct().getName())
                     .color(item.getProductVariant().getColor())
                     .quantity(item.getQuantity())
-                    .discount(item.getProductVariant().getDiscount())
+                    .discount(discountPercent)
                     .priceAtOrder(item.getProductVariant().getPrice())
                     .discountedPrice(discountedPrice)
                     .calculatePrice(calculatePrice)

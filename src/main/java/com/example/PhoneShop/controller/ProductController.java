@@ -5,10 +5,12 @@ import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.CreateProductRequest;
 import com.example.PhoneShop.dto.request.AttributRequest;
+import com.example.PhoneShop.dto.request.ProductVariant.CreateDiscountRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
+import com.example.PhoneShop.dto.response.DiscountResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.service.ProductService;
@@ -141,4 +143,18 @@ public class ProductController {
         return productService.updateProductVariant(variantId, request);
     }
 
+    @PostMapping("/discount")
+    DiscountResponse createDiscount(@RequestBody @Valid CreateDiscountRequest request){
+        return productService.createDiscount(request);
+    }
+
+    @GetMapping("/discount/getActive/{variantId}")
+    DiscountResponse getActiveDiscount(@PathVariable Long variantId){
+        return productService.getActiveDiscount(variantId);
+    }
+
+    @GetMapping("/discount/getAll/{variantId}")
+    List<DiscountResponse> getAllDiscount(@PathVariable Long variantId){
+        return productService.getAllDiscountsByVariant(variantId);
+    }
 }
