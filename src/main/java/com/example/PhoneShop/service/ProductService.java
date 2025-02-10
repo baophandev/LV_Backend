@@ -16,10 +16,7 @@ import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.DiscountMapper;
 import com.example.PhoneShop.mapper.ProductMapper;
-import com.example.PhoneShop.repository.CategoryRepository;
-import com.example.PhoneShop.repository.DiscountRepository;
-import com.example.PhoneShop.repository.ProductRepository;
-import com.example.PhoneShop.repository.ProductVariantRepository;
+import com.example.PhoneShop.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -49,6 +46,7 @@ public class ProductService {
     ProductVariantRepository productVariantRepository;
     DiscountRepository discountRepository;
     DiscountMapper discountMapper;
+    PriceHistoryRepository priceHistoryRepository;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
@@ -246,8 +244,29 @@ public class ProductService {
         productVariant.setPrice(request.getPrice());
         productVariant.setStock(request.getStock());
 
-        productVariantRepository.save(productVariant);
+        LocalDateTime updateTime = LocalDateTime.now();
+        Optional<PriceHistory> currPriceHistoryOpt = priceHistoryRepository
+                .findCurrentPriceHistoryByProductVariantId(id);
 
+        productVariantRepository.save(productVariant);
+        if (currPriceHistoryOpt.isPresent()){
+            PriceHistory currPriceHistory = currPriceHistoryOpt.get();
+
+            //Nếu endDate chưa được set, tức đây là giá hiện tại
+            if(currPriceHistory.getEndDate() == null){
+                currPriceHistory.setEndDate(updateTime);
+                priceHistoryRepository.save(currPriceHistory);
+            }
+        }
+
+        PriceHistory newPriceHistory = PriceHistory.builder()
+                .productVariant(productVariant)
+                .price(productVariant.getPrice())
+                .startDate(updateTime)
+                .endDate(null)
+                .build();
+
+        priceHistoryRepository.save(newPriceHistory);
         return "Update variant successfully";
     }
 
