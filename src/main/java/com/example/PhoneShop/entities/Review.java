@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,9 @@ public class Review {
 
     @Column(name = "rvm_rating")
     Double rating;
+
+    @Column(name = "rvm_created_at")
+    LocalDateTime createdAt;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "review", orphanRemoval = true)
     @EqualsAndHashCode.Exclude

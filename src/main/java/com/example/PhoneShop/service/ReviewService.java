@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +53,7 @@ public class ReviewService {
         review.setProduct(product);
         review.setRating(request.getRating());
         review.setUser(user);
+        review.setCreatedAt(LocalDateTime.now());
 
         List<ReviewImage> images = new ArrayList<>();
         for (MultipartFile file : files){
@@ -73,6 +75,7 @@ public class ReviewService {
                 .displayName(review.getUser().getDisplayName())
                 .comment(review.getComment())
                 .rating(review.getRating())
+                .createdAt(review.getCreatedAt())
                 .images(review.getImages())
                 .build();
     }
