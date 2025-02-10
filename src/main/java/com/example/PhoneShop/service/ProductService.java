@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -235,38 +236,53 @@ public class ProductService {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public String updateProductVariant(Long id, UpdateVariantRequest request){
+    public String updateProductVariant(Long id, UpdateVariantRequest request) {
+        // Lấy thông tin ProductVariant hiện tại
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
 
+        // Kiểm tra xem giá có thay đổi không
+        boolean priceChanged = !productVariant.getPrice().equals(request.getPrice());
+
+        // Cập nhật các trường không liên quan đến giá
         productVariant.setSold(request.getSold());
         productVariant.setColor(request.getColor());
-        productVariant.setPrice(request.getPrice());
         productVariant.setStock(request.getStock());
 
-        LocalDateTime updateTime = LocalDateTime.now();
-        Optional<PriceHistory> currPriceHistoryOpt = priceHistoryRepository
-                .findCurrentPriceHistoryByProductVariantId(id);
+        // Nếu giá mới khác giá cũ thì tiến hành cập nhật giá và lưu lịch sử
+        if (priceChanged) {
+            LocalDateTime updateTime = LocalDateTime.now();
 
-        productVariantRepository.save(productVariant);
-        if (currPriceHistoryOpt.isPresent()){
-            PriceHistory currPriceHistory = currPriceHistoryOpt.get();
+            // Lấy thông tin bản ghi giá hiện tại (bản ghi có endDate == null)
+            Optional<PriceHistory> currPriceHistoryOpt = priceHistoryRepository
+                    .findCurrentPriceHistoryByProductVariantId(id);
 
-            //Nếu endDate chưa được set, tức đây là giá hiện tại
-            if(currPriceHistory.getEndDate() == null){
-                currPriceHistory.setEndDate(updateTime);
-                priceHistoryRepository.save(currPriceHistory);
+            // Cập nhật giá mới cho variant
+            productVariant.setPrice(request.getPrice());
+            productVariantRepository.save(productVariant);
+
+            // Nếu có bản ghi giá hiện tại và endDate chưa được set, cập nhật endDate bằng thời điểm update
+            if (currPriceHistoryOpt.isPresent()) {
+                PriceHistory currPriceHistory = currPriceHistoryOpt.get();
+                if (currPriceHistory.getEndDate() == null) {
+                    currPriceHistory.setEndDate(updateTime);
+                    priceHistoryRepository.save(currPriceHistory);
+                }
             }
+
+            // Tạo bản ghi mới cho giá mới với startDate = thời điểm cập nhật và endDate = null
+            PriceHistory newPriceHistory = PriceHistory.builder()
+                    .productVariant(productVariant)
+                    .price(productVariant.getPrice())  // Giả sử field đã được đổi tên thành 'price'
+                    .startDate(updateTime)
+                    .endDate(null)
+                    .build();
+            priceHistoryRepository.save(newPriceHistory);
+        } else {
+            // Nếu giá không thay đổi, chỉ cập nhật các thông tin khác
+            productVariantRepository.save(productVariant);
         }
 
-        PriceHistory newPriceHistory = PriceHistory.builder()
-                .productVariant(productVariant)
-                .price(productVariant.getPrice())
-                .startDate(updateTime)
-                .endDate(null)
-                .build();
-
-        priceHistoryRepository.save(newPriceHistory);
         return "Update variant successfully";
     }
 
