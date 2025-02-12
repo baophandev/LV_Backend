@@ -69,6 +69,16 @@ public class ReviewService {
 
         reviewRepository.save(review);
 
+        List<Review> reviews = reviewRepository.findByProductId(product.getId());
+
+        double avgRating = reviews.stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0);
+
+        product.setRating(avgRating);
+        productRepository.save(product);
+
         return ReviewResponse.builder()
                 .id(review.getId())
                 .prdId(review.getProduct().getId())
