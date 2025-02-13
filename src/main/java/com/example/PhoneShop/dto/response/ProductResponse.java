@@ -19,6 +19,7 @@ public class ProductResponse {
     String description;
     Double rating;
     Integer sold;
+    Integer discountDisplayed;
     ProductStatus status;
     List<Image> images = new ArrayList<>();
     List<String> related_id = new ArrayList<>();
