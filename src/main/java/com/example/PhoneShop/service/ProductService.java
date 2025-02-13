@@ -10,11 +10,13 @@ import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.DiscountResponse;
+import com.example.PhoneShop.dto.response.PriceResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.DiscountMapper;
+import com.example.PhoneShop.mapper.PriceMapper;
 import com.example.PhoneShop.mapper.ProductMapper;
 import com.example.PhoneShop.repository.*;
 import lombok.AccessLevel;
@@ -48,6 +50,7 @@ public class ProductService {
     DiscountRepository discountRepository;
     DiscountMapper discountMapper;
     PriceHistoryRepository priceHistoryRepository;
+    PriceMapper priceMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
@@ -190,8 +193,37 @@ public class ProductService {
     public CustomPageResponse<ProductResponse> getByStatus(ProductStatus status, Pageable pageable){
         Page<Product> products = productRepository.findByStatus(status, pageable);
 
+        LocalDateTime now = LocalDateTime.now();
+
         List<ProductResponse> productResponses = products.getContent()
-                .stream().map(productMapper::toProductResponse).toList();
+                .stream()
+                .map(product -> {
+                    // Chuyển đổi Product sang ProductResponse
+                    ProductResponse productResponse = productMapper.toProductResponse(product);
+
+                    // Kiểm tra nếu danh sách variant không rỗng
+                    if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+                        // Lấy sản phẩm variant đầu tiên (hoặc chọn variant theo logic của bạn)
+                        ProductVariant variant = product.getVariants().get(0);
+
+                        // Lấy discount nếu có theo variant và thời gian hiện tại
+                        Optional<Discount> discountOptional = discountRepository
+                                .findFirstByProductVariant_IdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(
+                                        variant.getId(), now, now);
+
+                        // Nếu có discount thì lấy giá trị, nếu không thì mặc định là 0
+                        int discountValue = discountOptional.map(Discount::getDiscountValue).orElse(0);
+
+                        // Gán giá trị discount vào trường discountDisplayed của ProductResponse
+                        productResponse.setDiscountDisplayed(discountValue);
+                    } else {
+                        // Nếu không có variant, mặc định discount là 0
+                        productResponse.setDiscountDisplayed(0);
+                    }
+
+                    return productResponse;
+                })
+                .collect(Collectors.toList());
 
         return CustomPageResponse.<ProductResponse>builder()
                 .pageNumber(products.getNumber())
@@ -211,8 +243,37 @@ public class ProductService {
             products = productRepository.findByStatusAndCategoryId(status, categoryId, pageable);
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         List<ProductResponse> productResponses = products.getContent()
-                .stream().map(productMapper::toProductResponse).toList();
+                .stream()
+                .map(product -> {
+                    // Chuyển đổi Product sang ProductResponse
+                    ProductResponse productResponse = productMapper.toProductResponse(product);
+
+                    // Kiểm tra nếu danh sách variant không rỗng
+                    if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+                        // Lấy sản phẩm variant đầu tiên (hoặc chọn variant theo logic của bạn)
+                        ProductVariant variant = product.getVariants().get(0);
+
+                        // Lấy discount nếu có theo variant và thời gian hiện tại
+                        Optional<Discount> discountOptional = discountRepository
+                                .findFirstByProductVariant_IdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(
+                                        variant.getId(), now, now);
+
+                        // Nếu có discount thì lấy giá trị, nếu không thì mặc định là 0
+                        int discountValue = discountOptional.map(Discount::getDiscountValue).orElse(0);
+
+                        // Gán giá trị discount vào trường discountDisplayed của ProductResponse
+                        productResponse.setDiscountDisplayed(discountValue);
+                    } else {
+                        // Nếu không có variant, mặc định discount là 0
+                        productResponse.setDiscountDisplayed(0);
+                    }
+
+                    return productResponse;
+                })
+                .collect(Collectors.toList());
 
         return CustomPageResponse.<ProductResponse>builder()
                 .pageNumber(products.getNumber())
@@ -379,6 +440,13 @@ public class ProductService {
         List<Discount> discounts = discountRepository.findByProductVariant_Id(variantId);
         return discounts.stream()
                 .map(discountMapper::toDiscountResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<PriceResponse> getAllPriceHistoryByVariant(Long variantId){
+        List<PriceHistory> priceHistories = priceHistoryRepository.findByProductVariant_Id(variantId);
+        return priceHistories.stream()
+                .map(priceMapper::toPriceResponse)
                 .collect(Collectors.toList());
     }
 }

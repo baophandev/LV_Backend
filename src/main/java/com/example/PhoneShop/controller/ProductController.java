@@ -11,6 +11,7 @@ import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.DiscountResponse;
+import com.example.PhoneShop.dto.response.PriceResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.service.ProductService;
@@ -156,5 +157,10 @@ public class ProductController {
     @GetMapping("/discount/getAll/{variantId}")
     List<DiscountResponse> getAllDiscount(@PathVariable Long variantId){
         return productService.getAllDiscountsByVariant(variantId);
+    }
+
+    @GetMapping("/price/getAll/{variantId}")
+    List<PriceResponse> getAllPriceHistoryByVariant(@PathVariable Long variantId){
+        return productService.getAllPriceHistoryByVariant(variantId);
     }
 }
