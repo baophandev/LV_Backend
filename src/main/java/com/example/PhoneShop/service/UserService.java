@@ -93,7 +93,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not existed"));
 
         user.setDisplayName(request.getDisplayName());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setDob(request.getDob());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setEmail(request.getEmail());
