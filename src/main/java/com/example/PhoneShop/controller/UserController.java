@@ -66,4 +66,13 @@ public class UserController {
     UserResponse getUser(){
         return userService.getMyInfo();
     }
+
+    @PutMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    UserResponse updateUser(
+            @PathVariable String userId,
+            @RequestPart("user") @Valid CreateUserRequest request,
+            @RequestPart("avatar") MultipartFile file
+    ) throws IOException {
+        return userService.updateInfo(userId, request, file);
+    }
 }

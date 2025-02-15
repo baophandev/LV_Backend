@@ -2,6 +2,7 @@ package com.example.PhoneShop.service;
 
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.User.CreateUserRequest;
+import com.example.PhoneShop.dto.request.User.UpdateUserRequest;
 import com.example.PhoneShop.dto.response.UserResponse;
 import com.example.PhoneShop.entities.Avatar;
 import com.example.PhoneShop.entities.Role;
@@ -81,6 +82,33 @@ public class UserService {
             user = userRepository.save(user);
         }catch (DataIntegrityViolationException exception){
             throw new AppException(HttpStatus.BAD_REQUEST, "User existed! Please check your phone number or email");
+        }
+
+        return userMapper.toUserResponse(user);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    public UserResponse updateInfo(String userId, CreateUserRequest request, MultipartFile file) throws IOException{
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not existed"));
+
+        user.setDisplayName(request.getDisplayName());
+        user.setPassword(request.getPassword());
+        user.setDob(request.getDob());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setEmail(request.getEmail());
+
+        Avatar avatar = Avatar.builder()
+                .imageType(file.getContentType())
+                .data(file.getBytes())
+                .user(user)
+                .build();
+        user.setAvatar(avatar);
+
+        try {
+            user = userRepository.save(user);
+        }catch (DataIntegrityViolationException exception){
+            throw new AppException(HttpStatus.BAD_REQUEST, exception.getMessage());
         }
 
         return userMapper.toUserResponse(user);
