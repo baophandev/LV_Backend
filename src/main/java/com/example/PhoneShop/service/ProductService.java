@@ -321,6 +321,14 @@ public class ProductService {
                 .build();
 
         productVariantRepository.save(productVariant);
+        // Tạo bản ghi mới cho giá mới với startDate = thời điểm cập nhật và endDate = null
+        PriceHistory newPriceHistory = PriceHistory.builder()
+                .productVariant(productVariant)
+                .price(productVariant.getPrice())  // Giả sử field đã được đổi tên thành 'price'
+                .startDate(LocalDateTime.now())
+                .endDate(null)
+                .build();
+        priceHistoryRepository.save(newPriceHistory);
 
         return  productVariant.getId();
     }
