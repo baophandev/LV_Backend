@@ -98,12 +98,14 @@ public class UserService {
         user.setPhoneNumber(request.getPhoneNumber());
         user.setEmail(request.getEmail());
 
-        Avatar avatar = Avatar.builder()
-                .imageType(file.getContentType())
-                .data(file.getBytes())
-                .user(user)
-                .build();
-        user.setAvatar(avatar);
+        if(file != null && !file.isEmpty()){
+            Avatar avatar = Avatar.builder()
+                    .imageType(file.getContentType())
+                    .data(file.getBytes())
+                    .user(user)
+                    .build();
+            user.setAvatar(avatar);
+        }
 
         try {
             user = userRepository.save(user);
