@@ -56,14 +56,20 @@ public class ReviewService {
         review.setCreatedAt(LocalDateTime.now());
 
         List<ReviewImage> images = new ArrayList<>();
-        for (MultipartFile file : files){
-            ReviewImage image = ReviewImage.builder()
-                    .imageType(file.getContentType())
-                    .data(file.getBytes())
-                    .review(review)
-                    .build();
-            images.add(image);
+
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                if (file != null && file.getSize() > 0) {
+                    ReviewImage image = ReviewImage.builder()
+                            .imageType(file.getContentType())
+                            .data(file.getBytes())
+                            .review(review)
+                            .build();
+                    images.add(image);
+                }
+            }
         }
+
 
         review.setImages(images);
 
