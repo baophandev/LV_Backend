@@ -44,4 +44,19 @@ public class CategoryController {
         return "Category has been deleted";
     }
 
+    @PutMapping("/{id}")
+    ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
+            @PathVariable String id,
+            @RequestParam String name
+    ){
+        CategoryResponse categoryResponse = categoryService.updateCategory(id, name);
+
+        ApiResponse<CategoryResponse> response = ApiResponse.<CategoryResponse>builder()
+                .message("Update category successfully")
+                .code("category-s-02")
+                .data(categoryResponse)
+                .build();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
 }

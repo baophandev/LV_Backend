@@ -48,4 +48,15 @@ public class CategoryService {
         categoryRepository.deleteById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public CategoryResponse updateCategory(String id, String name){
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category does not exist"));
+
+        category.setName(name);
+        categoryRepository.save(category);
+
+        return categoryMapper.toCategoryResponse(category);
+    }
+
 }
