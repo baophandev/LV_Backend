@@ -457,4 +457,14 @@ public class ProductService {
                 .map(priceMapper::toPriceResponse)
                 .collect(Collectors.toList());
     }
+
+    public List<ProductResponse> searchProductsByName(String name) {
+        List<Product> products = productRepository.findByNameContainingIgnoreCase(name);
+
+        // Sử dụng MapStruct để chuyển đổi danh sách Product -> ProductResponse
+        return products.stream()
+                .map(productMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+
 }

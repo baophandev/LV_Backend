@@ -163,4 +163,11 @@ public class ProductController {
     List<PriceResponse> getAllPriceHistoryByVariant(@PathVariable Long variantId){
         return productService.getAllPriceHistoryByVariant(variantId);
     }
+
+    @GetMapping("/search")
+    List<ProductResponse> searchProductByName(
+            @RequestParam String name
+    ){
+        return productService.searchProductsByName(name);
+    }
 }
