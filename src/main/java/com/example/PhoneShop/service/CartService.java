@@ -137,4 +137,43 @@ public class CartService {
 
         cartItemRepository.deleteById(cartItemId);
     }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    public String increaseQuantity(String userId, Long cartItemId) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Cart item not found!", "cartItem-e-01"));
+
+        if (!cartItem.getCart().getUser().getId().equals(userId)) {
+            throw new AppException(HttpStatus.FORBIDDEN, "You are not authorized to modify this item.", "cartItem-e-02");
+        }
+
+        ProductVariant variant = cartItem.getProductVariant();
+        if (cartItem.getQuantity() >= variant.getStock()) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Not enough stock available!", "product-e-02");
+        }
+
+        cartItem.setQuantity(cartItem.getQuantity() + 1);
+        cartItemRepository.save(cartItem);
+
+        return "Increase cart item quantity successfully!";
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    public String decreaseQuantity(String userId, Long cartItemId) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Cart item not found!", "cartItem-e-01"));
+
+        if (!cartItem.getCart().getUser().getId().equals(userId)) {
+            throw new AppException(HttpStatus.FORBIDDEN, "You are not authorized to modify this item.", "cartItem-e-02");
+        }
+
+        if (cartItem.getQuantity() == 1) {
+            cartItemRepository.delete(cartItem);
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() - 1);
+            cartItemRepository.save(cartItem);
+        }
+
+        return "Decrease cart item quantity successfully!";
+    }
 }

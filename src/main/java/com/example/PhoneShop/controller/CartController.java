@@ -59,4 +59,20 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.OK).body(ex.getMessage());
         }
     }
+
+    @PostMapping("/increaseQuantity")
+    public String increaseQuantity(
+            @RequestParam String userId,
+            @RequestParam Long variantId
+    ){
+        return cartService.increaseQuantity(userId, variantId);
+    }
+
+    @PostMapping("/decreaseQuantity")
+    public String decreaseQuantity(
+            @RequestParam String userId,
+            @RequestParam Long variantId
+    ){
+        return cartService.decreaseQuantity(userId, variantId);
+    }
 }
