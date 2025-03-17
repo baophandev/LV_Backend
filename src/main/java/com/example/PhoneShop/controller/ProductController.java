@@ -170,4 +170,11 @@ public class ProductController {
     ){
         return productService.searchProductsByName(name);
     }
+
+    @GetMapping("/related/{productId}")
+    List<ProductResponse> getRelatedProducts(
+            @PathVariable String productId
+    ){
+        return productService.getRelatedProducts(productId);
+    }
 }

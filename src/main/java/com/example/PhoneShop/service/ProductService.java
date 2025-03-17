@@ -467,4 +467,23 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    public List<ProductResponse> getRelatedProducts(String productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
+
+        if (product.getRelated_id() == null || product.getRelated_id().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Product> relatedProducts = productRepository.findAllByIdIn(product.getRelated_id());
+
+        log.info(relatedProducts.toString());
+        log.info(product.getRelated_id().toString());
+
+        return relatedProducts.stream()
+                .map(productMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+
+
 }
