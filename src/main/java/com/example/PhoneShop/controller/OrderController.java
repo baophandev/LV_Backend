@@ -46,6 +46,16 @@ public class OrderController {
         return orderService.getByStatus(userId, status, pageable);
     }
 
+    @GetMapping("/getAll")
+    CustomPageResponse<OrderResponse> getAllOrderOptional(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "6") int pageSize
+    ){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return orderService.getAllOrder( status, pageable);
+    }
+
     @GetMapping("/{orderId}")
     OrderResponse getOrderById(
             @PathVariable String orderId

@@ -198,4 +198,28 @@ public class OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public CustomPageResponse<OrderResponse> getAllOrder(OrderStatus status, Pageable pageable) {
+        Page<Order> orders;
+
+        if (status != null) {
+            orders = orderRepository.findByStatus(status, pageable);
+        } else {
+            orders = orderRepository.findAll(pageable);
+        }
+
+        List<OrderResponse> orderResponses = orders.getContent()
+                .stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+
+        return CustomPageResponse.<OrderResponse>builder()
+                .pageNumber(orders.getNumber())
+                .totalElements(orders.getTotalElements())
+                .totalPages(orders.getTotalPages())
+                .pageSize(orders.getSize())
+                .content(orderResponses)
+                .build();
+    }
+
 }
