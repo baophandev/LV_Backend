@@ -60,19 +60,13 @@ public class CartController {
         }
     }
 
-    @PostMapping("/increaseQuantity")
-    public String increaseQuantity(
+    @PostMapping("/updateQuantity")
+    public String updateQuantity(
             @RequestParam String userId,
-            @RequestParam Long variantId
+            @RequestParam Long variantId,
+            @RequestParam Integer quantity
     ){
-        return cartService.increaseQuantity(userId, variantId);
+        return cartService.updateQuantity(userId, variantId, quantity);
     }
 
-    @PostMapping("/decreaseQuantity")
-    public String decreaseQuantity(
-            @RequestParam String userId,
-            @RequestParam Long variantId
-    ){
-        return cartService.decreaseQuantity(userId, variantId);
-    }
 }
