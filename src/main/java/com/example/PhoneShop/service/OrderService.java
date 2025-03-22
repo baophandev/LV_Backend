@@ -108,6 +108,7 @@ public class OrderService {
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
                     .prdId(item.getProductVariant().getProduct().getId())
+                    .variantId(item.getProductVariant().getId())
                     .name(item.getProductVariant().getProduct().getName())
                     .color(item.getProductVariant().getColor())
                     .quantity(item.getQuantity())
@@ -192,6 +193,22 @@ public class OrderService {
                 .orElseThrow(() -> new AppException( HttpStatus.NOT_FOUND, "Order not found"));
 
         order.setStatus(orderStatus);
+
+        if(orderStatus == OrderStatus.CANCELLED){
+            for(OrderItem item : order.getItems()){
+                ProductVariant productVariant = productVariantRepository.findById(item.getVariantId())
+                        .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product variant not found"));
+
+                // Cộng lại số lượng vào stock
+                productVariant.setStock(productVariant.getStock() + item.getQuantity());
+
+                // Giảm số lượng đã bán
+                productVariant.setSold(productVariant.getSold() - item.getQuantity());
+
+                // Lưu lại thay đổi vào database
+                productVariantRepository.save(productVariant);
+            }
+        }
 
         orderRepository.save(order);
 

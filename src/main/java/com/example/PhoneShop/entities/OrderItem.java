@@ -26,6 +26,9 @@ public class OrderItem {
     @Column(name = "order_prd_id", nullable = false)
     String prdId;
 
+    @Column(name = "order_variant_id", nullable = false)
+    Long variantId;
+
     @Column(name = "order_prd_name", nullable = false)
     String name;
 
