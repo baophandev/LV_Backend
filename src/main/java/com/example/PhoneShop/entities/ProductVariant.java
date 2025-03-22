@@ -46,6 +46,14 @@ public class ProductVariant {
     @JsonIgnore  // Không hiển thị trong JSON
     List<Discount> discounts;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "productVariant", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    List<CartItem> cartItems;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "variant", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    List<StockItem> stockItems;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prd_id")
     @JsonBackReference

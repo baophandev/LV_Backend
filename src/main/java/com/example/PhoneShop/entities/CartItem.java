@@ -25,11 +25,6 @@ public class CartItem {
     @JsonBackReference
     Cart cart;
 
-//    @ManyToOne(fetch = FetchType.EAGER)
-//    @JoinColumn(name = "prd_id", nullable = false)
-//    @JsonBackReference
-//    Product product;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "variant_id", nullable = false)
     @JsonBackReference
