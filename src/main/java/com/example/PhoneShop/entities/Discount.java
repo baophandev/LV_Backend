@@ -32,4 +32,5 @@ public class Discount {
     @JoinColumn(name = "variant_id")
     @JsonBackReference
     ProductVariant productVariant;
+
 }

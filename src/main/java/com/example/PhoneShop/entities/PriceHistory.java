@@ -32,4 +32,5 @@ public class PriceHistory {
     @JoinColumn(name = "variant_id")
     @JsonBackReference
     ProductVariant productVariant;
+
 }

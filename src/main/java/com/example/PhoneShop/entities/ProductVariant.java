@@ -2,11 +2,14 @@ package com.example.PhoneShop.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Fetch;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -34,6 +37,14 @@ public class ProductVariant {
 
     @Column(name = "variant_discount", nullable = false)
     Integer discount;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "productVariant", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore  // Không hiển thị trong JSON
+    List<PriceHistory> priceHistories;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "productVariant", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore  // Không hiển thị trong JSON
+    List<Discount> discounts;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prd_id")
