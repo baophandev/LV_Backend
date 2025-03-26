@@ -117,13 +117,21 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public CustomPageResponse<UserResponse> getAll(Pageable pageable){
-        Page<User> users = userRepository.findAll(pageable);
+    public CustomPageResponse<UserResponse> getUsersByRole(String roleName, Pageable pageable) {
+        Page<User> users;
+
+        if (roleName == null || roleName.isEmpty()) {
+            users = userRepository.findAll(pageable); // Nếu không có roleName, lấy tất cả user
+        } else {
+            Role role = roleRepository.findById(roleName)
+                    .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Role not found"));
+            users = userRepository.findByRole(role, pageable);
+        }
 
         List<UserResponse> userResponses = users.getContent()
                 .stream().map(userMapper::toUserResponse).toList();
 
-        return  CustomPageResponse.<UserResponse>builder()
+        return CustomPageResponse.<UserResponse>builder()
                 .pageNumber(users.getNumber())
                 .pageSize(users.getSize())
                 .totalPages(users.getTotalPages())

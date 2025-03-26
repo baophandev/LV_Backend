@@ -54,12 +54,13 @@ public class UserController {
     }
 
     @GetMapping
-    CustomPageResponse<UserResponse> getAll(
+    public CustomPageResponse<UserResponse> getUsersByRole(
+            @RequestParam(required = false) String roleName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size
-    ){
+    ) {
         Pageable pageable = PageRequest.of(page, size);
-        return userService.getAll(pageable);
+        return userService.getUsersByRole(roleName, pageable);
     }
 
     @GetMapping("/myInfo")
@@ -75,4 +76,5 @@ public class UserController {
     ) throws IOException {
         return userService.updateInfo(userId, request, file);
     }
+
 }
