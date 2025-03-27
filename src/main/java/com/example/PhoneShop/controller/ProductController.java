@@ -37,9 +37,11 @@ public class ProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<ProductResponse>> create(
             @RequestPart("product") @Valid CreateProductRequest request,
-            @RequestPart("files") List<MultipartFile> files) throws IOException {
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestPart("avatar") MultipartFile avatar
+            ) throws IOException {
 
-        ProductResponse productResponse = productService.create(request, files);
+        ProductResponse productResponse = productService.create(request, avatar, files);
 
         ApiResponse<ProductResponse> response = ApiResponse.<ProductResponse>builder()
                 .message("Add product successfully")
@@ -82,9 +84,10 @@ public class ProductController {
     ResponseEntity<ApiResponse<ProductResponse>> update(
             @PathVariable String productId,
             @RequestPart("product") @Valid UpdateProductRequest request,
-            @RequestPart("files") List<MultipartFile> files) throws IOException {
+            @RequestPart("files") List<MultipartFile> files,
+            @RequestPart("avatar") MultipartFile avatar) throws IOException {
 
-        ProductResponse productResponse = productService.updateProduct(productId, request, files);
+        ProductResponse productResponse = productService.updateProduct(productId, request, files, avatar);
 
         ApiResponse<ProductResponse> response = ApiResponse.<ProductResponse>builder()
                 .message("Update product successfully")

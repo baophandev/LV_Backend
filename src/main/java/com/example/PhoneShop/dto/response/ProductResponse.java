@@ -3,6 +3,7 @@ package com.example.PhoneShop.dto.response;
 
 import com.example.PhoneShop.entities.Category;
 import com.example.PhoneShop.entities.Image;
+import com.example.PhoneShop.entities.ProductAvatar;
 import com.example.PhoneShop.entities.ProductVariant;
 import com.example.PhoneShop.enums.ProductStatus;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class ProductResponse {
     Integer sold;
     Integer discountDisplayed;
     ProductStatus status;
+    ProductAvatar productAvatar = new ProductAvatar();
     List<Image> images = new ArrayList<>();
     List<String> related_id = new ArrayList<>();
     Category category;

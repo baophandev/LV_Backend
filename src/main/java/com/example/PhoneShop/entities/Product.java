@@ -45,6 +45,12 @@ public class Product {
     @Column(name = "prd_related_id")
     List<String> related_id;
 
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
+    ProductAvatar productAvatar;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

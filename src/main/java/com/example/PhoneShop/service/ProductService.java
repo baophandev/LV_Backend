@@ -53,7 +53,7 @@ public class ProductService {
     PriceMapper priceMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ProductResponse create(CreateProductRequest request, List<MultipartFile> files) throws IOException {
+    public ProductResponse create(CreateProductRequest request, MultipartFile avatar, List<MultipartFile> files) throws IOException {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
@@ -67,6 +67,14 @@ public class ProductService {
         product.setCreatedAt(LocalDateTime.now());
         List<Review> reviews = new ArrayList<>();
         product.setReviews(reviews);
+        new ProductAvatar();
+        ProductAvatar avatarFile = ProductAvatar.builder().
+                imageType(avatar.getContentType())
+                .data(avatar.getBytes())
+                .product(product)
+                .build();
+
+        product.setProductAvatar(avatarFile);
         List<Image> images = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -80,14 +88,14 @@ public class ProductService {
         product.setImages(images);
 
         return productMapper.toProductResponse(productRepository.save(product));
-
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ProductResponse updateProduct(
             String id,
             UpdateProductRequest request,
-            List<MultipartFile> files) throws IOException {
+            List<MultipartFile> files,
+            MultipartFile avatar) throws IOException {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
 
@@ -95,6 +103,13 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setStatus(request.getStatus());
         product.setRelated_id(request.getRelated_id());
+        ProductAvatar productAvatar = ProductAvatar.builder()
+                .imageType(avatar.getContentType())
+                .data(avatar.getBytes())
+                .product(product)
+                .build();
+
+        product.setProductAvatar(productAvatar);
 
         if(request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()){
             product.getImages().removeIf(image -> request.getRemoveImageIds().contains(image.getId()));

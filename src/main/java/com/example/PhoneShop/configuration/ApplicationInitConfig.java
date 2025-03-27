@@ -26,9 +26,9 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository){
         return args -> {
-            if (userRepository.findByPhoneNumber("0123456789").isEmpty()) {
+            if (userRepository.findByPhoneNumber("admin").isEmpty()) {
                 User user = User.builder()
-                        .phoneNumber("0123456789")
+                        .phoneNumber("admin")
                         .email("admin@gmail.com")
                         .displayName("Admin")
                         .role(roleRepository.findById(String.valueOf(UserRole.ADMIN)).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")))

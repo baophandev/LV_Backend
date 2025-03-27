@@ -1,5 +1,5 @@
 application:
-  name: PhoneShop
+  name: ShoeStore
 
 server:
   port: 8080
@@ -8,7 +8,7 @@ server:
 
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/phone_service}
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/shoe_service}
     username: root
     password: sa2023
   jpa:
