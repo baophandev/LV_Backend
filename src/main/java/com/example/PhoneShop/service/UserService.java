@@ -144,7 +144,15 @@ public class UserService {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
 
-        User user = userRepository.findById(name).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not existed"));
+        User user = userRepository.findById(name).orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User does not existed"));
+
+        return userMapper.toUserResponse(user);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public  UserResponse getUserByPhoneNumber(String phoneNumber){
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() ->  new AppException(HttpStatus.NOT_FOUND, "User does not existed"));
 
         return userMapper.toUserResponse(user);
     }

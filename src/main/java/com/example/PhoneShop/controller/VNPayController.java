@@ -27,7 +27,7 @@ public class VNPayController {
             @RequestParam(value = "bankCode", required = false) String bankCode) throws UnsupportedEncodingException {
 
         String vnp_TxnRef = String.format("%08d", new Random().nextInt(100000000));
-        int vnp_Amount = amount * 100; // amount là số tiền VND
+        long vnp_Amount = amount* 100L; // amount là số tiền VND
 
         String vnp_IpAddr = VNPayConfig.getIpAddress();
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
