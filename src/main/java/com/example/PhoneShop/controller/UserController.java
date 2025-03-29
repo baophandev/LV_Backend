@@ -77,4 +77,10 @@ public class UserController {
         return userService.updateInfo(userId, request, file);
     }
 
+    @GetMapping("/search")
+    UserResponse getUserByPhoneNumber(@RequestParam String phoneNumber){
+        return userService.getUserByPhoneNumber(phoneNumber);
+
+    }
+
 }
