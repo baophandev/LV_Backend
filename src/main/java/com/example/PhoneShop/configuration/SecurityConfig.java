@@ -33,11 +33,11 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final String[] PUBLIC_POST_ENDPOINTS = {
-            "/user", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh"
+            "/user", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh", "/api/vnpay/**"
     };
 
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/product/**", "/category", "/product", "/review"
+            "/product/**", "/category", "/product", "/review", "/api/vnpay/**"
     };
 
     @Autowired

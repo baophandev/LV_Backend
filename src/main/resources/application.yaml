@@ -8,7 +8,7 @@ server:
 
 spring:
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/phone_service}
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/phone_service_draft}
     username: root
     password: sa2023
   jpa:
@@ -26,3 +26,4 @@ jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
   valid-duration: 7200 # in second
   refreshable-duration: 10800 # in seconds
+
