@@ -2,7 +2,9 @@ package com.example.PhoneShop.service;
 
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
+import com.example.PhoneShop.dto.response.DailyRevenueResponse;
 import com.example.PhoneShop.dto.response.OrderResponse;
+import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.enums.ProductStatus;
@@ -19,10 +21,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -236,6 +243,76 @@ public class OrderService {
                 .totalPages(orders.getTotalPages())
                 .pageSize(orders.getSize())
                 .content(orderResponses)
+                .build();
+    }
+
+    public List<DailyRevenueResponse> getDailyRevenue() {
+        List<Object[]> results = orderRepository.findDailyRevenueByStatus(OrderStatus.DELIVERED);
+
+        return results.stream()
+                .map(obj -> {
+                    // Chuyển đổi java.sql.Date sang LocalDate
+                    java.sql.Date sqlDate = (java.sql.Date) obj[0];
+                    LocalDate date = sqlDate.toLocalDate();
+
+                    // Cast tổng doanh thu sang kiểu Long
+                    Long totalRevenue = (Long) obj[1];
+
+                    return DailyRevenueResponse.builder()
+                            .date(date)
+                            .totalRevenue(totalRevenue)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    public SummaryRevenueResponse getSummaryRevenue() {
+        OrderStatus completedStatus = OrderStatus.DELIVERED;
+
+        // Tính toán các mốc thời gian
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. Doanh thu trong ngày
+        LocalDateTime startOfDay = now.with(LocalTime.MIN); // 00:00:00
+        LocalDateTime endOfDay = now.with(LocalTime.MAX);   // 23:59:59.999999999
+        Long dailyRevenue = orderRepository.getRevenueByPeriod(
+                completedStatus,
+                startOfDay,
+                endOfDay
+        );
+
+        // 2. Doanh thu trong tuần (tính từ Thứ 2 đầu tiên của tuần)
+        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
+        LocalDateTime endOfWeek = startOfWeek.plusDays(6).with(LocalTime.MAX);
+        Long weeklyRevenue = orderRepository.getRevenueByPeriod(
+                completedStatus,
+                startOfWeek,
+                endOfWeek
+        );
+
+        // 3. Doanh thu trong tháng
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).with(LocalTime.MIN);
+        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+        Long monthlyRevenue = orderRepository.getRevenueByPeriod(
+                completedStatus,
+                startOfMonth,
+                endOfMonth
+        );
+
+        // 4. Doanh thu trong năm
+        LocalDateTime startOfYear = now.withDayOfYear(1).with(LocalTime.MIN);
+        LocalDateTime endOfYear = now.with(TemporalAdjusters.lastDayOfYear()).with(LocalTime.MAX);
+        Long yearlyRevenue = orderRepository.getRevenueByPeriod(
+                completedStatus,
+                startOfYear,
+                endOfYear
+        );
+
+        return SummaryRevenueResponse.builder()
+                .dailyRevenue(dailyRevenue)
+                .weeklyRevenue(weeklyRevenue)
+                .monthlyRevenue(monthlyRevenue)
+                .yearlyRevenue(yearlyRevenue)
                 .build();
     }
 

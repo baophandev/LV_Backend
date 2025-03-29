@@ -3,7 +3,9 @@ package com.example.PhoneShop.controller;
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
+import com.example.PhoneShop.dto.response.DailyRevenueResponse;
 import com.example.PhoneShop.dto.response.OrderResponse;
+import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.service.OrderService;
 import jakarta.validation.Valid;
@@ -12,7 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/order")
@@ -69,5 +74,17 @@ public class OrderController {
             @RequestParam OrderStatus status
     ){
         return  orderService.updateOrderStatus(orderId, status);
+    }
+
+    @GetMapping("/revenue/daily")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<List<DailyRevenueResponse>> getDailyRevenue() {
+        return ResponseEntity.ok(orderService.getDailyRevenue());
+    }
+
+    @GetMapping("/revenue/summary")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<SummaryRevenueResponse> getRevenueSummary() {
+        return ResponseEntity.ok(orderService.getSummaryRevenue());
     }
 }
