@@ -13,12 +13,15 @@ import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.dto.response.DiscountResponse;
 import com.example.PhoneShop.dto.response.PriceResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
+import com.example.PhoneShop.entities.Product;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -176,5 +179,19 @@ public class ProductController {
             @PathVariable String productId
     ){
         return productService.getRelatedProducts(productId);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<CustomPageResponse<ProductResponse>> filterProducts(
+            @RequestParam(required = false) String categoryId,
+            @RequestParam(required = false) ProductStatus status,
+            @RequestParam(defaultValue = "firstVariantPrice") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection,
+            @PageableDefault(size = 10) Pageable pageable
+    ) {
+        CustomPageResponse<ProductResponse> response = productService.filterProducts(
+                categoryId, status, sortBy, sortDirection, pageable
+        );
+        return ResponseEntity.ok(response);
     }
 }

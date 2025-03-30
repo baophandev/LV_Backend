@@ -24,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -485,5 +487,57 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    // ProductService.java
+    public CustomPageResponse<ProductResponse> filterProducts(
+            String categoryId,
+            ProductStatus status,
+            String sortBy,
+            String sortDirection,
+            Pageable pageable
+    ) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+
+        Page<Product> products;
+        if (categoryId != null && status != null) {
+            products =  productRepository.findByStatusAndCategoryId(status, categoryId, sortedPageable);
+        } else if (categoryId != null) {
+             products =  productRepository.findByCategoryId(categoryId, sortedPageable);
+        } else if (status != null) {
+             products =  productRepository.findByStatus(status, sortedPageable);
+        } else {
+             products =  productRepository.findAll(sortedPageable);
+        }
+        // Thêm logic convert sang ProductResponse
+        LocalDateTime now = LocalDateTime.now();
+        List<ProductResponse> content = products.getContent().stream()
+                .map(product -> {
+                    ProductResponse response = productMapper.toProductResponse(product);
+
+                    if (!product.getVariants().isEmpty()) {
+                        ProductVariant variant = product.getVariants().get(0);
+                        Optional<Discount> discount = discountRepository.findFirstByProductVariant_IdAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByStartDateDesc(
+                                variant.getId(), now, now
+                        );
+                        response.setDiscountDisplayed(discount.map(Discount::getDiscountValue).orElse(0));
+                    }
+
+                    return response;
+                })
+                .collect(Collectors.toList());
+
+        return new CustomPageResponse<>(
+                products.getNumber(),
+                products.getSize(),
+                products.getTotalElements(),
+                products.getTotalPages(),
+                content
+        );
+    }
 
 }
