@@ -3,9 +3,7 @@ package com.example.PhoneShop.controller;
 import com.example.PhoneShop.dto.api.ApiResponse;
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
-import com.example.PhoneShop.dto.response.DailyRevenueResponse;
-import com.example.PhoneShop.dto.response.OrderResponse;
-import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
+import com.example.PhoneShop.dto.response.*;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.service.OrderService;
 import jakarta.validation.Valid;
@@ -86,5 +84,17 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<SummaryRevenueResponse> getRevenueSummary() {
         return ResponseEntity.ok(orderService.getSummaryRevenue());
+    }
+
+    @GetMapping("/revenue/monthly")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<List<MonthlyRevenueResponse>> getMonthlyRevenue() {
+        return ResponseEntity.ok(orderService.getMonthlyRevenue());
+    }
+
+    @GetMapping("/revenue/yearly")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<List<YearlyRevenueResponse>> getYearlyRevenue() {
+        return ResponseEntity.ok(orderService.getYearlyRevenue());
     }
 }

@@ -24,6 +24,22 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             "ORDER BY FUNCTION('DATE', o.orderDate) DESC")
     List<Object[]> findDailyRevenueByStatus(@Param("status") OrderStatus status);
 
+    // Thống kê theo tháng
+    @Query("SELECT YEAR(o.orderDate) AS year, MONTH(o.orderDate) AS month, SUM(o.totalPrice) AS totalRevenue " +
+            "FROM Order o " +
+            "WHERE o.status = :status " +
+            "GROUP BY YEAR(o.orderDate), MONTH(o.orderDate) " +
+            "ORDER BY YEAR(o.orderDate) DESC, MONTH(o.orderDate) DESC")
+    List<Object[]> findMonthlyRevenueByStatus(@Param("status") OrderStatus status);
+
+    // Thống kê theo năm
+    @Query("SELECT YEAR(o.orderDate) AS year, SUM(o.totalPrice) AS totalRevenue " +
+            "FROM Order o " +
+            "WHERE o.status = :status " +
+            "GROUP BY YEAR(o.orderDate) " +
+            "ORDER BY YEAR(o.orderDate) DESC")
+    List<Object[]> findYearlyRevenueByStatus(@Param("status") OrderStatus status);
+
     // Tính tổng doanh thu trong khoảng thời gian và trạng thái cụ thể
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) " +
             "FROM Order o " +
@@ -34,5 +50,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+
 
 }

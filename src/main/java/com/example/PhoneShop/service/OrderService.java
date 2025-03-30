@@ -2,9 +2,7 @@ package com.example.PhoneShop.service;
 
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
-import com.example.PhoneShop.dto.response.DailyRevenueResponse;
-import com.example.PhoneShop.dto.response.OrderResponse;
-import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
+import com.example.PhoneShop.dto.response.*;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.enums.ProductStatus;
@@ -263,6 +261,29 @@ public class OrderService {
                             .totalRevenue(totalRevenue)
                             .build();
                 })
+                .collect(Collectors.toList());
+    }
+
+    public List<MonthlyRevenueResponse> getMonthlyRevenue() {
+        List<Object[]> results = orderRepository.findMonthlyRevenueByStatus(OrderStatus.DELIVERED);
+
+        return results.stream()
+                .map(obj -> MonthlyRevenueResponse.builder()
+                        .year((Integer) obj[0])
+                        .month((Integer) obj[1])
+                        .totalRevenue((Long) obj[2])
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<YearlyRevenueResponse> getYearlyRevenue() {
+        List<Object[]> results = orderRepository.findYearlyRevenueByStatus(OrderStatus.DELIVERED);
+
+        return results.stream()
+                .map(obj -> YearlyRevenueResponse.builder()
+                        .year((Integer) obj[0])
+                        .totalRevenue((Long) obj[1])
+                        .build())
                 .collect(Collectors.toList());
     }
 
