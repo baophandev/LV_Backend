@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ public class Product {
     @Column (name = "prd_description", nullable = false, length=1000000)
     @Lob
     String description;
+
+    @Formula("(SELECT COALESCE(pv.variant_price, 0) FROM product_variant pv WHERE pv.prd_id = prd_id ORDER BY pv.variant_id LIMIT 1)")
+    private Integer firstVariantPrice;
 
     @Column(name = "prd_rating")
     Double rating;
