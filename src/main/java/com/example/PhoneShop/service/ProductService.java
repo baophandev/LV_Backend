@@ -8,10 +8,7 @@ import com.example.PhoneShop.dto.request.ProductVariant.CreateDiscountRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
-import com.example.PhoneShop.dto.response.AttributeResponse;
-import com.example.PhoneShop.dto.response.DiscountResponse;
-import com.example.PhoneShop.dto.response.PriceResponse;
-import com.example.PhoneShop.dto.response.ProductResponse;
+import com.example.PhoneShop.dto.response.*;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
@@ -36,7 +33,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -290,8 +286,8 @@ public class ProductService {
     }
 
 
-    public ProductResponse getById(String id) {
-        return productMapper.toProductResponse(productRepository.findById(id)
+    public ProductDetailResponse getById(String id) {
+        return productMapper.toProductDetailResponse(productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist!", "product-e-02")));
     }
 

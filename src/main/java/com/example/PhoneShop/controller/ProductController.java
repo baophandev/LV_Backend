@@ -9,10 +9,7 @@ import com.example.PhoneShop.dto.request.ProductVariant.CreateDiscountRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.CreateVariantRequest;
 import com.example.PhoneShop.dto.request.ProductVariant.UpdateVariantRequest;
 import com.example.PhoneShop.dto.request.UpdateProductRequest;
-import com.example.PhoneShop.dto.response.AttributeResponse;
-import com.example.PhoneShop.dto.response.DiscountResponse;
-import com.example.PhoneShop.dto.response.PriceResponse;
-import com.example.PhoneShop.dto.response.ProductResponse;
+import com.example.PhoneShop.dto.response.*;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.service.ProductService;
 import jakarta.validation.Valid;
@@ -110,7 +107,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    ProductResponse getById(@PathVariable String productId){
+    ProductDetailResponse getById(@PathVariable String productId){
         return productService.getById(productId);
     }
 

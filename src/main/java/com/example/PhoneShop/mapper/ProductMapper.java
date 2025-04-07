@@ -1,6 +1,7 @@
 package com.example.PhoneShop.mapper;
 
 import com.example.PhoneShop.dto.request.CreateProductRequest;
+import com.example.PhoneShop.dto.response.ProductDetailResponse;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.dto.response.AttributeResponse;
 import com.example.PhoneShop.entities.Attribute;
@@ -16,4 +17,5 @@ public interface ProductMapper {
     @Mapping(target = "productAvatar", source = "product.productAvatar")
     ProductResponse toProductResponse(Product product);
 
+    ProductDetailResponse toProductDetailResponse(Product product);
 }
