@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Fetch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -26,6 +27,9 @@ public class ProductVariant {
     @Column(name = "variant_color", nullable = false)
     String color;
 
+    @Column(name = "variant_color_code", nullable = false)
+    String colorCode;
+
     @Column(name = "variant_price", nullable = false)
     Integer price;
 
@@ -37,6 +41,12 @@ public class ProductVariant {
 
     @Column(name = "variant_discount", nullable = false)
     Integer discount;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "productVariant", orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonManagedReference
+    List<VariantImage> variantImages = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "productVariant", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore  // Không hiển thị trong JSON

@@ -55,12 +55,6 @@ public class Product {
     @JsonManagedReference
     ProductAvatar productAvatar;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", orphanRemoval = true)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    @JsonManagedReference
-    List<Image> images = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ctg_id")
     @EqualsAndHashCode.Exclude

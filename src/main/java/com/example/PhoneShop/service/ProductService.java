@@ -87,8 +87,6 @@ public class ProductService {
                     .build();
             images.add(image);
         }
-        product.setImages(images);
-
         return productMapper.toProductResponse(productRepository.save(product));
     }
 
@@ -113,26 +111,26 @@ public class ProductService {
 
         product.setProductAvatar(productAvatar);
 
-        if(request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()){
-            product.getImages().removeIf(image -> request.getRemoveImageIds().contains(image.getId()));
-        }
-
-        if (product.getImages().isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
-        }
-
-        if(files != null && !files.isEmpty()){
-            for(MultipartFile file : files){
-                if (!file.isEmpty()) {
-                    Image image = Image.builder()
-                            .imageType(file.getContentType())
-                            .data(file.getBytes())
-                            .product(product)
-                            .build();
-                    product.getImages().add(image);
-                }
-            }
-        }
+//        if(request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()){
+//            product.getImages().removeIf(image -> request.getRemoveImageIds().contains(image.getId()));
+//        }
+//
+//        if (product.getImages().isEmpty()) {
+//            throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
+//        }
+//
+//        if(files != null && !files.isEmpty()){
+//            for(MultipartFile file : files){
+//                if (!file.isEmpty()) {
+//                    Image image = Image.builder()
+//                            .imageType(file.getContentType())
+//                            .data(file.getBytes())
+//                            .product(product)
+//                            .build();
+//                    product.getImages().add(image);
+//                }
+//            }
+//        }
 
         return productMapper.toProductResponse(productRepository.save(product));
     }

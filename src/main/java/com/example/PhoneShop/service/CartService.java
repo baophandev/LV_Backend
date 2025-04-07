@@ -56,7 +56,7 @@ public class CartService {
                                 .productId(item.getProductVariant().getProduct().getId())
                                 .productName(item.getProductVariant().getProduct().getName())
                                 .productColor(item.getProductVariant().getColor())
-                                .images(item.getProductVariant().getProduct().getImages())
+//                                .images(item.getProductVariant().getProduct().getImages())
                                 .quantity(item.getQuantity())
                                 .price(item.getProductVariant().getPrice())
                                 .build())
