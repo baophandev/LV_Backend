@@ -8,10 +8,13 @@ import com.example.PhoneShop.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -20,9 +23,12 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    @PostMapping
-    ResponseEntity<ApiResponse<CategoryResponse>> create(@RequestBody @Valid CreateCategoryRequest request){
-        CategoryResponse categoryResponse = categoryService.create(request);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<ApiResponse<CategoryResponse>> create(
+            @RequestPart("category") @Valid CreateCategoryRequest request,
+            @RequestPart("files") List<MultipartFile> files
+    ) throws IOException {
+        CategoryResponse categoryResponse = categoryService.create(request, files);
 
         ApiResponse<CategoryResponse> response = ApiResponse.<CategoryResponse>builder()
                 .message("Add category successfully")

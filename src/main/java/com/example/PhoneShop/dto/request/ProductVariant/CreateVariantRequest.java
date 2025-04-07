@@ -15,6 +15,9 @@ public class CreateVariantRequest {
     @NotBlank(message = "Color cannot be blank")
     String color;
 
+    @NotBlank(message = "Color code be blank")
+    String colorCode;
+
     @NotNull(message = "Price cannot be blank")
     Integer price;
 

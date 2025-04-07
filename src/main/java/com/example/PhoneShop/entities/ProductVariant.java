@@ -39,6 +39,9 @@ public class ProductVariant {
     @Column(name = "variant_sold", nullable = false)
     Integer sold;
 
+    @Column(name = "variant_is_active", nullable = false)
+    Boolean isActive;
+
     @Column(name = "variant_discount", nullable = false)
     Integer discount;
 

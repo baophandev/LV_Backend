@@ -38,11 +38,10 @@ public class ProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<ProductResponse>> create(
             @RequestPart("product") @Valid CreateProductRequest request,
-            @RequestPart("files") List<MultipartFile> files,
             @RequestPart("avatar") MultipartFile avatar
             ) throws IOException {
 
-        ProductResponse productResponse = productService.create(request, avatar, files);
+        ProductResponse productResponse = productService.create(request, avatar);
 
         ApiResponse<ProductResponse> response = ApiResponse.<ProductResponse>builder()
                 .message("Add product successfully")
@@ -85,10 +84,9 @@ public class ProductController {
     ResponseEntity<ApiResponse<ProductResponse>> update(
             @PathVariable String productId,
             @RequestPart("product") @Valid UpdateProductRequest request,
-            @RequestPart("files") List<MultipartFile> files,
             @RequestPart("avatar") MultipartFile avatar) throws IOException {
 
-        ProductResponse productResponse = productService.updateProduct(productId, request, files, avatar);
+        ProductResponse productResponse = productService.updateProduct(productId, request, avatar);
 
         ApiResponse<ProductResponse> response = ApiResponse.<ProductResponse>builder()
                 .message("Update product successfully")
@@ -133,11 +131,12 @@ public class ProductController {
         return "Variant has been deleted";
     }
 
-    @PostMapping("/variant")
+    @PostMapping( value = "/variant", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Long createVariant(
-            @RequestBody @Valid CreateVariantRequest request
-    ){
-        return productService.createProductVariant(request);
+            @RequestPart("variant") @Valid CreateVariantRequest request,
+            @RequestPart("files") @Valid List<MultipartFile> files
+    ) throws IOException {
+        return productService.createProductVariant(request, files);
     }
 
     @PutMapping("/variant/{variantId}")

@@ -4,6 +4,7 @@ package com.example.PhoneShop.service;
 import com.example.PhoneShop.dto.request.CreateCategoryRequest;
 import com.example.PhoneShop.dto.response.CategoryResponse;
 import com.example.PhoneShop.entities.Category;
+import com.example.PhoneShop.entities.CategoryImage;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.CategoryMapper;
 import com.example.PhoneShop.repository.CategoryRepository;
@@ -14,7 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -26,16 +30,35 @@ public class CategoryService {
     CategoryMapper categoryMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public CategoryResponse create(CreateCategoryRequest request){
+    public CategoryResponse create(CreateCategoryRequest request, List<MultipartFile> files) throws IOException {
 
-        if(categoryRepository.existsByName(request.getName())){
+        if (categoryRepository.existsByName(request.getName())) {
             log.warn("Category already exists: {}", request.getName());
             throw new AppException(HttpStatus.FOUND, "Category already exists");
         }
 
-        Category category = categoryMapper.toCategory(request);
+        // Tạo mới Category, tự khởi tạo categoryImages để tránh null
+        Category category = Category.builder()
+                .name(request.getName())
+                .categoryImages(new ArrayList<>())
+                .build();
 
-        return categoryMapper.toCategoryResponse(categoryRepository.save(category));
+        // Thêm ảnh nếu có
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    CategoryImage categoryImage = CategoryImage.builder()
+                            .imageType(file.getContentType())
+                            .data(file.getBytes())
+                            .category(category)
+                            .build();
+
+                    category.getCategoryImages().add(categoryImage);
+                }
+            }
+        }
+        Category savedCategory = categoryRepository.save(category);
+        return categoryMapper.toCategoryResponse(savedCategory);
     }
 
     public List<CategoryResponse> getAll(){

@@ -23,7 +23,6 @@ public class ProductResponse {
     Integer discountDisplayed;
     ProductStatus status;
     ProductAvatar productAvatar = new ProductAvatar();
-    List<Image> images = new ArrayList<>();
     List<String> related_id = new ArrayList<>();
     Category category;
     List<ProductVariant> variants = new ArrayList<>();

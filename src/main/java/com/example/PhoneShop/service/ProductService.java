@@ -55,7 +55,7 @@ public class ProductService {
     PriceMapper priceMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ProductResponse create(CreateProductRequest request, MultipartFile avatar, List<MultipartFile> files) throws IOException {
+    public ProductResponse create(CreateProductRequest request, MultipartFile avatar) throws IOException {
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
@@ -77,16 +77,7 @@ public class ProductService {
                 .build();
 
         product.setProductAvatar(avatarFile);
-        List<Image> images = new ArrayList<>();
 
-        for (MultipartFile file : files) {
-            Image image = Image.builder()
-                    .imageType(file.getContentType())
-                    .data(file.getBytes())
-                    .product(product)
-                    .build();
-            images.add(image);
-        }
         return productMapper.toProductResponse(productRepository.save(product));
     }
 
@@ -94,7 +85,6 @@ public class ProductService {
     public ProductResponse updateProduct(
             String id,
             UpdateProductRequest request,
-            List<MultipartFile> files,
             MultipartFile avatar) throws IOException {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product not found", "product-e-01"));
@@ -322,31 +312,52 @@ public class ProductService {
     * Product variant
     */
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public Long createProductVariant(CreateVariantRequest request){
+    public Long createProductVariant(CreateVariantRequest request, List<MultipartFile> files) throws IOException {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-01"));
+
+        // ✅ Kiểm tra ít nhất 1 ảnh hợp lệ
+        if (files == null || files.isEmpty() || files.stream().allMatch(MultipartFile::isEmpty)) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "At least one image is required", "variant-e-01");
+        }
 
         ProductVariant productVariant = ProductVariant.builder()
                 .product(product)
                 .price(request.getPrice())
                 .color(request.getColor())
                 .discount(0)
+                .colorCode(request.getColorCode())
+                .isActive(true)
                 .sold(0)
+                .variantImages(new ArrayList<>())
                 .stock(request.getStock())
                 .build();
 
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                VariantImage variantImage = VariantImage.builder()
+                        .imageType(file.getContentType())
+                        .data(file.getBytes())
+                        .productVariant(productVariant)
+                        .build();
+
+                productVariant.getVariantImages().add(variantImage);
+            }
+        }
+
         productVariantRepository.save(productVariant);
-        // Tạo bản ghi mới cho giá mới với startDate = thời điểm cập nhật và endDate = null
+
         PriceHistory newPriceHistory = PriceHistory.builder()
                 .productVariant(productVariant)
-                .price(productVariant.getPrice())  // Giả sử field đã được đổi tên thành 'price'
+                .price(productVariant.getPrice())
                 .startDate(LocalDateTime.now())
                 .endDate(null)
                 .build();
         priceHistoryRepository.save(newPriceHistory);
 
-        return  productVariant.getId();
+        return productVariant.getId();
     }
+
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public String updateProductVariant(Long id, UpdateVariantRequest request) {
