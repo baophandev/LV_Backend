@@ -136,13 +136,15 @@ public class ProductController {
         return productService.createProductVariant(request, files);
     }
 
-    @PutMapping("/variant/{variantId}")
-    String updateVariant(
-            @RequestBody @Valid UpdateVariantRequest request,
-            @PathVariable Long variantId
-            ){
-        return productService.updateProductVariant(variantId, request);
+    @PutMapping(value = "/variant/{variantId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String updateVariant(
+            @RequestPart("variant") @Valid UpdateVariantRequest request,
+            @PathVariable Long variantId,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) throws IOException {
+        return productService.updateProductVariant(variantId, request, files);
     }
+
 
     @PostMapping("/discount")
     DiscountResponse createDiscount(@RequestBody @Valid CreateDiscountRequest request){

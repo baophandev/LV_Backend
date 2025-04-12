@@ -18,6 +18,7 @@ public class ProductDetailResponse {
     Double rating;
     Integer sold;
     Integer discountDisplayed;
+    Integer firstVariantPrice;
     ProductStatus status;
     ProductAvatar productAvatar = new ProductAvatar();
     List<String> related_id = new ArrayList<>();

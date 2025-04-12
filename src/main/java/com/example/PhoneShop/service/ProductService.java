@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,7 +89,6 @@ public class ProductService {
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setStatus(request.getStatus());
-        product.setRelated_id(request.getRelated_id());
         ProductAvatar productAvatar = ProductAvatar.builder()
                 .imageType(avatar.getContentType())
                 .data(avatar.getBytes())
@@ -96,27 +96,6 @@ public class ProductService {
                 .build();
 
         product.setProductAvatar(productAvatar);
-
-//        if(request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()){
-//            product.getImages().removeIf(image -> request.getRemoveImageIds().contains(image.getId()));
-//        }
-//
-//        if (product.getImages().isEmpty()) {
-//            throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
-//        }
-//
-//        if(files != null && !files.isEmpty()){
-//            for(MultipartFile file : files){
-//                if (!file.isEmpty()) {
-//                    Image image = Image.builder()
-//                            .imageType(file.getContentType())
-//                            .data(file.getBytes())
-//                            .product(product)
-//                            .build();
-//                    product.getImages().add(image);
-//                }
-//            }
-//        }
 
         return productMapper.toProductResponse(productRepository.save(product));
     }
@@ -356,7 +335,7 @@ public class ProductService {
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public String updateProductVariant(Long id, UpdateVariantRequest request) {
+    public String updateProductVariant(Long id, UpdateVariantRequest request, List<MultipartFile> newImages) throws IOException {
         // Lấy thông tin ProductVariant hiện tại
         ProductVariant productVariant = productVariantRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Variant does not exist", "variant-e-01"));
@@ -365,9 +344,32 @@ public class ProductService {
         boolean priceChanged = !productVariant.getPrice().equals(request.getPrice());
 
         // Cập nhật các trường không liên quan đến giá
-        productVariant.setSold(request.getSold());
         productVariant.setColor(request.getColor());
-        productVariant.setStock(request.getStock());
+        productVariant.setIsActive(request.getIsActive());
+
+        //Xóa các ảnh có trong danh sách removeImageIds
+        if (request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()) {
+            Iterator<VariantImage> iterator = productVariant.getVariantImages().iterator();
+            while (iterator.hasNext()) {
+                VariantImage image = iterator.next();
+                if (request.getRemoveImageIds().contains(image.getId())) {
+                    iterator.remove(); // Xoá trực tiếp trong list gốc
+                }
+            }
+        }
+
+        if(newImages != null && !newImages.isEmpty()){
+            for(MultipartFile file : newImages){
+                if (!file.isEmpty()) {
+                    VariantImage image = VariantImage.builder()
+                            .imageType(file.getContentType())
+                            .data(file.getBytes())
+                            .productVariant(productVariant)
+                            .build();
+                    productVariant.getVariantImages().add(image);
+                }
+            }
+        }
 
         // Nếu giá mới khác giá cũ thì tiến hành cập nhật giá và lưu lịch sử
         if (priceChanged) {
@@ -560,3 +562,21 @@ public class ProductService {
     }
 
 }
+
+//
+//        if (product.getImages().isEmpty()) {
+//            throw new AppException(HttpStatus.BAD_REQUEST, "Product must have at least one image", "product-e-02");
+//        }
+//
+//        if(files != null && !files.isEmpty()){
+//            for(MultipartFile file : files){
+//                if (!file.isEmpty()) {
+//                    Image image = Image.builder()
+//                            .imageType(file.getContentType())
+//                            .data(file.getBytes())
+//                            .product(product)
+//                            .build();
+//                    product.getImages().add(image);
+//                }
+//            }
+//        }

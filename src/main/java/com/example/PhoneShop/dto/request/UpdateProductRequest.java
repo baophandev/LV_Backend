@@ -26,8 +26,6 @@ public class UpdateProductRequest {
 
     ProductStatus status;
 
-    List<String> removeImageIds; //Danh sach ID ảnh cần xóa
-
-    List<String>  related_id;
+//    List<String>  related_id;
 
 }

@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,9 +20,10 @@ public class UpdateVariantRequest {
     @NotNull(message = "Price cannot be blank")
     Integer price;
 
-    @NotNull(message = "Stock cannot be blank")
-    Integer stock;
+    @NotBlank(message = "Color code cannot be blank")
+    String colorCode;
 
-    @NotNull(message = "Sold cannot be blank")
-    Integer sold;
+    Boolean isActive;
+
+    List<String> removeImageIds = new ArrayList<>();
 }

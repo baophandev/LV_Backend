@@ -15,7 +15,9 @@ public interface ProductMapper {
     AttributeResponse toAttributeResponse(Attribute attribute);
 
     @Mapping(target = "productAvatar", source = "product.productAvatar")
+    @Mapping(target = "firstVariantPrice", source = "product.firstVariantPrice")
     ProductResponse toProductResponse(Product product);
+
 
     ProductDetailResponse toProductDetailResponse(Product product);
 }
