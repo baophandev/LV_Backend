@@ -346,6 +346,7 @@ public class ProductService {
         // Cập nhật các trường không liên quan đến giá
         productVariant.setColor(request.getColor());
         productVariant.setIsActive(request.getIsActive());
+        productVariant.setColorCode(request.getColorCode());
 
         //Xóa các ảnh có trong danh sách removeImageIds
         if (request.getRemoveImageIds() != null && !request.getRemoveImageIds().isEmpty()) {
