@@ -2,6 +2,7 @@ package com.example.PhoneShop.dto.response;
 
 import com.example.PhoneShop.entities.CartItem;
 import com.example.PhoneShop.entities.Image;
+import com.example.PhoneShop.entities.ProductAvatar;
 import com.example.PhoneShop.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +31,7 @@ public class CartResponse {
         String productId;
         String productName;
         String productColor;
-        List<Image> images = new ArrayList<>();
+        ProductAvatar productAvatar = new ProductAvatar();
         Integer quantity;
         Integer price;
     }

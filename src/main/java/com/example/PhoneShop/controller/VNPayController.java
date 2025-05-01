@@ -114,10 +114,10 @@ public class VNPayController {
 
             if ("00".equals(responseCode)) {
                 updateOrderStatus(txnRef, "PAID");
-                redirectUrl = "http://localhost:5173/vnpay/success";
+                redirectUrl = "http://localhost:3000/order/vnpay/success";
             } else {
                 String errorMsg = getErrorMessage(responseCode);
-                redirectUrl = "http://localhost:5173/vnpay/fail" + URLEncoder.encode(errorMsg, StandardCharsets.UTF_8);
+                redirectUrl = "http://localhost:3000/order/vnpay/error" + URLEncoder.encode(errorMsg, StandardCharsets.UTF_8);
             }
         }
 

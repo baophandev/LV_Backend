@@ -21,8 +21,8 @@ public class CreateVariantRequest {
     @NotNull(message = "Price cannot be blank")
     Integer price;
 
-    @NotNull(message = "Stock cannot be blank")
-    Integer stock;
+//    @NotNull(message = "Stock cannot be blank")
+//    Integer stock;
 
 //    @NotNull(message = "Sold cannot be blank")
 //    Integer sold;

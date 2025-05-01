@@ -291,7 +291,6 @@ public class ProductService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Product does not exist", "product-e-01"));
 
-        // ✅ Kiểm tra ít nhất 1 ảnh hợp lệ
         if (files == null || files.isEmpty() || files.stream().allMatch(MultipartFile::isEmpty)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "At least one image is required", "variant-e-01");
         }
@@ -302,10 +301,10 @@ public class ProductService {
                 .color(request.getColor())
                 .discount(0)
                 .colorCode(request.getColorCode())
-                .isActive(true)
+                .isActive(false)
                 .sold(0)
+                .stock(0)
                 .variantImages(new ArrayList<>())
-                .stock(request.getStock())
                 .build();
 
         for (MultipartFile file : files) {
