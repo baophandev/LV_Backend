@@ -5,6 +5,7 @@ import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
 import com.example.PhoneShop.dto.response.DailyRevenueResponse;
 import com.example.PhoneShop.dto.response.OrderResponse;
+import com.example.PhoneShop.dto.response.ProductRevenueResponse;
 import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.service.OrderService;
@@ -86,5 +87,11 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<SummaryRevenueResponse> getRevenueSummary() {
         return ResponseEntity.ok(orderService.getSummaryRevenue());
+    }
+
+    @GetMapping("/revenue/daily-products")
+    public ResponseEntity<List<ProductRevenueResponse>> getDailyProductRevenue() {
+        List<ProductRevenueResponse> revenueData = orderService.getDailyProductRevenue();
+        return ResponseEntity.ok(revenueData);
     }
 }

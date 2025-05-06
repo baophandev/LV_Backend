@@ -4,6 +4,7 @@ import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.OrderRequest.CreateOrderRequest;
 import com.example.PhoneShop.dto.response.DailyRevenueResponse;
 import com.example.PhoneShop.dto.response.OrderResponse;
+import com.example.PhoneShop.dto.response.ProductRevenueResponse;
 import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.enums.OrderStatus;
@@ -314,6 +315,42 @@ public class OrderService {
                 .monthlyRevenue(monthlyRevenue)
                 .yearlyRevenue(yearlyRevenue)
                 .build();
+    }
+
+    public List<ProductRevenueResponse> getDailyProductRevenue(){
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfDay = now.with(LocalTime.MIN);  // ⏰ 00:00:00
+        LocalDateTime endOfDay = now.with(LocalTime.MAX);
+
+        log.info("Querying product revenue from {} to {}", startOfDay, endOfDay);
+
+        List<Object[]> results = orderRepository.findProductRevenueByDate(
+                OrderStatus.DELIVERED,
+                startOfDay,
+                endOfDay
+        );
+
+        log.info("Found {} results", results.size());
+
+        return results.stream()
+                .map(obj -> {
+                    String productId = (String) obj[0];
+                    Long variantId = ((Number) obj[1]).longValue(); // Sửa thành Number -> Long
+                    String productName = (String) obj[2];
+                    String color = (String) obj[3];
+                    Long totalRevenue = ((Number) obj[4]).longValue();
+                    Integer totalQuantity = ((Number) obj[5]).intValue();
+
+                    return ProductRevenueResponse.builder()
+                            .productId(productId)
+                            .variantId(variantId)
+                            .productName(productName)
+                            .color(color)
+                            .totalRevenue(totalRevenue)
+                            .totalQuantity(totalQuantity)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
 }

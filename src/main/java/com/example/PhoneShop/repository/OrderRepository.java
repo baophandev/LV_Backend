@@ -36,4 +36,16 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    @Query("SELECT oi.prdId, oi.variantId, oi.name, oi.color, SUM(oi.calculatePrice), SUM(oi.quantity) " +
+            "FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE o.status = :status " +
+            "AND o.orderDate BETWEEN :start AND :end " +
+            "GROUP BY oi.prdId, oi.variantId, oi.name, oi.color")
+    List<Object[]> findProductRevenueByDate(
+            @Param("status") OrderStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+        );
 }
