@@ -19,18 +19,18 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     Page<Order> findByUserId(String userId, Pageable pageable);
     Page<Order> findByUserIdAndStatus(String userId, OrderStatus status, Pageable pageable);
 
-    @Query("SELECT FUNCTION('DATE', o.orderDate) AS orderDate, SUM(o.totalPrice) AS totalRevenue " +
+    @Query("SELECT FUNCTION('DATE', o.receivedAt) AS receivedAt, SUM(o.totalPrice) AS totalRevenue " +
             "FROM Order o " +
             "WHERE o.status = :status " +
-            "GROUP BY FUNCTION('DATE', o.orderDate) " +
-            "ORDER BY FUNCTION('DATE', o.orderDate) DESC")
+            "GROUP BY FUNCTION('DATE', o.receivedAt) " +
+            "ORDER BY FUNCTION('DATE', o.receivedAt) DESC")
     List<Object[]> findDailyRevenueByStatus(@Param("status") OrderStatus status);
 
     // Tính tổng doanh thu trong khoảng thời gian và trạng thái cụ thể
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) " +
             "FROM Order o " +
             "WHERE o.status = :status " +
-            "AND o.orderDate BETWEEN :startDate AND :endDate")
+            "AND o.receivedAt BETWEEN :startDate AND :endDate")
     Long getRevenueByPeriod(
             @Param("status") OrderStatus status,
             @Param("startDate") LocalDateTime startDate,
@@ -41,7 +41,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
             "WHERE o.status = :status " +
-            "AND o.orderDate BETWEEN :start AND :end " +
+            "AND o.receivedAt BETWEEN :start AND :end " +
             "GROUP BY oi.prdId, oi.variantId, oi.name, oi.color")
     List<Object[]> findProductRevenueByDate(
             @Param("status") OrderStatus status,

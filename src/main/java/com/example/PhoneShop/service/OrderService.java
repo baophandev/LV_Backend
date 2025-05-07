@@ -218,6 +218,11 @@ public class OrderService {
             }
         }
 
+        if(orderStatus == OrderStatus.DELIVERED){
+            LocalDateTime now = LocalDateTime.now();
+            order.setReceivedAt(now);
+        }
+
         orderRepository.save(order);
 
         return orderMapper.toOrderResponse(order);
@@ -317,12 +322,13 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public List<ProductRevenueResponse> getDailyProductRevenue(){
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfDay = now.with(LocalTime.MIN);  // ⏰ 00:00:00
         LocalDateTime endOfDay = now.with(LocalTime.MAX);
 
-        log.info("Querying product revenue from {} to {}", startOfDay, endOfDay);
+//        log.info("Querying product revenue from {} to {}", startOfDay, endOfDay);
 
         List<Object[]> results = orderRepository.findProductRevenueByDate(
                 OrderStatus.DELIVERED,
@@ -330,7 +336,7 @@ public class OrderService {
                 endOfDay
         );
 
-        log.info("Found {} results", results.size());
+//        log.info("Found {} results", results.size());
 
         return results.stream()
                 .map(obj -> {

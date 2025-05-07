@@ -46,6 +46,9 @@ public class Order {
     @Column(name = "order_date", nullable = false)
     LocalDateTime orderDate;
 
+    @Column(name = "order_received_at")
+    LocalDateTime receivedAt;
+
     @Column(name = "order_note")
     String note;
 

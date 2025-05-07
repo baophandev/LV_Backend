@@ -28,6 +28,7 @@ public class OrderResponse {
     String address;
     List<OrderItem> items = new ArrayList<>();
     LocalDateTime orderDate;
+    LocalDateTime receivedAt;
     String note;
     OrderMethod method;
     OrderStatus status;
