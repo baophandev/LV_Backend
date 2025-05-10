@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -113,6 +114,8 @@ public class StockService {
                                                 .variantName(item.getVariant().getColor())
                                                 .quantity(item.getQuantity())
                                                 .priceAtStock(item.getPriceAtStock())
+                                                .price(item.getVariant().getPrice())
+                                                .stock(item.getVariant().getStock())
                                                 .build()).toList()
                         )
                         .build()
@@ -126,4 +129,47 @@ public class StockService {
                 .content(stockResponses)
                 .build();
     }
+
+    public CustomPageResponse<StockResponse> getStockById (Pageable pageable, String productId){
+        Pageable sortedByCreatedAt = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
+
+        Page<Stock> stocks = stockRepository.findAll(sortedByCreatedAt);
+
+        List<StockResponse> filteredStockResponses = stocks.stream()
+                .map(stock -> {
+                    List<StockResponse.StockItemResponseDTO> filteredItems = stock.getItems().stream()
+                            .filter(item -> item.getProduct().getId().equals(productId))
+                            .map(item -> StockResponse.StockItemResponseDTO.builder()
+                                    .id(item.getId())
+                                    .productName(item.getProduct().getName())
+                                    .variantName(item.getVariant().getColor())
+                                    .quantity(item.getQuantity())
+                                    .priceAtStock(item.getPriceAtStock())
+                                    .price(item.getVariant().getPrice())
+                                    .stock(item.getVariant().getStock())
+                                    .build()
+                            ).toList();
+
+                    if(filteredItems.isEmpty()) return null;
+
+                    return StockResponse.builder()
+                            .stockId(stock.getId())
+                            .createdAt(stock.getCreatedAt())
+                            .employeeName(stock.getUser().getDisplayName())
+                            .stockItemResponseDTO(filteredItems)
+                            .build();
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        return  CustomPageResponse.<StockResponse>builder()
+                .pageSize(pageable.getPageSize())
+                .pageNumber(pageable.getPageNumber())
+                .totalElements(filteredStockResponses.size())
+                .totalPages((int) Math.ceil((double) filteredStockResponses.size() / pageable.getPageSize()))
+                .content(filteredStockResponses)
+                .build();
+    }
+
+//    public CustomPageResponse<StockResponse>
 }

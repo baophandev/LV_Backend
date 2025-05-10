@@ -34,5 +34,7 @@ public class StockResponse {
         String variantName;
         Integer quantity;
         Integer priceAtStock;
+        Integer price;
+        Integer stock;
     }
 }

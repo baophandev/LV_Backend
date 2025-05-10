@@ -37,4 +37,14 @@ public class StockController {
         Pageable pageable = PageRequest.of(page, size);
         return stockService.getAll(pageable);
     }
+
+    @GetMapping("/product")
+    CustomPageResponse<StockResponse> getStockById(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam String productId
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        return stockService.getStockById(pageable, productId);
+    }
 }
