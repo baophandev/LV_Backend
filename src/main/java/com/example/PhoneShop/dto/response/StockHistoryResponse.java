@@ -3,6 +3,7 @@ package com.example.PhoneShop.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,19 +12,23 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StockResponse {
-    String prdId;
-    String productName;
-    String categoryName;
-    List<VariantDTO> variantDTOS = new ArrayList<>();
+public class StockHistoryResponse {
+    String stockId;
+    LocalDateTime createdAt;
+    String employeeName;
+    List<StockItemResponseDTO> stockItemResponseDTO = new ArrayList<>();
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class VariantDTO {
-        Long id;
-        String color;
+    public static class StockItemResponseDTO {
+        String id;
+        String productName;
+        String variantName;
+        Integer quantity;
+        Integer priceAtStock;
         Integer price;
         Integer stock;
     }

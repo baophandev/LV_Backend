@@ -2,9 +2,13 @@ package com.example.PhoneShop.service;
 
 import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.StockRequest.CreateStockRequest;
+import com.example.PhoneShop.dto.response.ProductDetailResponse;
+import com.example.PhoneShop.dto.response.ProductResponse;
+import com.example.PhoneShop.dto.response.StockHistoryResponse;
 import com.example.PhoneShop.dto.response.StockResponse;
 import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.exception.AppException;
+import com.example.PhoneShop.mapper.ProductMapper;
 import com.example.PhoneShop.repository.ProductRepository;
 import com.example.PhoneShop.repository.ProductVariantRepository;
 import com.example.PhoneShop.repository.StockRepository;
@@ -13,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.control.MappingControl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +25,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +40,10 @@ public class StockService {
     ProductVariantRepository productVariantRepository;
     StockRepository stockRepository;
     UserRepository userRepository;
+    ProductMapper productMapper;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public StockResponse create(CreateStockRequest request){
+    public StockHistoryResponse create(CreateStockRequest request){
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User does not exist!"));
 
@@ -77,8 +80,8 @@ public class StockService {
         stock.setItems(stockItems);
         stockRepository.save(stock);
 
-        List<StockResponse.StockItemResponseDTO> stockItemResponseDTO = stockItems.stream()
-                .map(item -> StockResponse.StockItemResponseDTO.builder()
+        List<StockHistoryResponse.StockItemResponseDTO> stockItemResponseDTO = stockItems.stream()
+                .map(item -> StockHistoryResponse.StockItemResponseDTO.builder()
                         .id(item.getId())
                         .productName(item.getProduct().getName())
                         .variantName(item.getVariant().getColor())
@@ -87,7 +90,7 @@ public class StockService {
                         .build()
                 ).toList();
 
-        return StockResponse.builder()
+        return StockHistoryResponse.builder()
                 .stockId(stock.getId())
                 .createdAt(stock.getCreatedAt())
                 .employeeName(stock.getUser().getDisplayName())
@@ -96,19 +99,19 @@ public class StockService {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public CustomPageResponse<StockResponse> getAll(Pageable pageable){
+    public CustomPageResponse<StockHistoryResponse> getAll(Pageable pageable){
         Pageable sortedByCreatedAt = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
 
         Page<Stock> stocks = stockRepository.findAll(sortedByCreatedAt);
 
-        List<StockResponse> stockResponses = stocks.stream().map(
-                stock -> StockResponse.builder()
+        List<StockHistoryResponse> stockHistoryRespons = stocks.stream().map(
+                stock -> StockHistoryResponse.builder()
                         .stockId(stock.getId())
                         .createdAt(stock.getCreatedAt())
                         .employeeName(stock.getUser().getDisplayName())
                         .stockItemResponseDTO(
                                 stock.getItems().stream()
-                                        .map(item -> StockResponse.StockItemResponseDTO.builder()
+                                        .map(item -> StockHistoryResponse.StockItemResponseDTO.builder()
                                                 .id(item.getId())
                                                 .productName(item.getProduct().getName())
                                                 .variantName(item.getVariant().getColor())
@@ -121,25 +124,25 @@ public class StockService {
                         .build()
         ).toList();
 
-        return CustomPageResponse.<StockResponse>builder()
+        return CustomPageResponse.<StockHistoryResponse>builder()
                 .pageSize(stocks.getSize())
                 .pageNumber(stocks.getNumber())
                 .totalElements(stocks.getTotalElements())
                 .totalPages(stocks.getTotalPages())
-                .content(stockResponses)
+                .content(stockHistoryRespons)
                 .build();
     }
 
-    public CustomPageResponse<StockResponse> getStockById (Pageable pageable, String productId){
+    public CustomPageResponse<StockHistoryResponse> getStockById (Pageable pageable, String productId){
         Pageable sortedByCreatedAt = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
 
         Page<Stock> stocks = stockRepository.findAll(sortedByCreatedAt);
 
-        List<StockResponse> filteredStockResponses = stocks.stream()
+        List<StockHistoryResponse> filteredStockHistoryResponse = stocks.stream()
                 .map(stock -> {
-                    List<StockResponse.StockItemResponseDTO> filteredItems = stock.getItems().stream()
+                    List<StockHistoryResponse.StockItemResponseDTO> filteredItems = stock.getItems().stream()
                             .filter(item -> item.getProduct().getId().equals(productId))
-                            .map(item -> StockResponse.StockItemResponseDTO.builder()
+                            .map(item -> StockHistoryResponse.StockItemResponseDTO.builder()
                                     .id(item.getId())
                                     .productName(item.getProduct().getName())
                                     .variantName(item.getVariant().getColor())
@@ -152,7 +155,7 @@ public class StockService {
 
                     if(filteredItems.isEmpty()) return null;
 
-                    return StockResponse.builder()
+                    return StockHistoryResponse.builder()
                             .stockId(stock.getId())
                             .createdAt(stock.getCreatedAt())
                             .employeeName(stock.getUser().getDisplayName())
@@ -162,14 +165,47 @@ public class StockService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        return  CustomPageResponse.<StockResponse>builder()
+        return  CustomPageResponse.<StockHistoryResponse>builder()
                 .pageSize(pageable.getPageSize())
                 .pageNumber(pageable.getPageNumber())
-                .totalElements(filteredStockResponses.size())
-                .totalPages((int) Math.ceil((double) filteredStockResponses.size() / pageable.getPageSize()))
-                .content(filteredStockResponses)
+                .totalElements(filteredStockHistoryResponse.size())
+                .totalPages((int) Math.ceil((double) filteredStockHistoryResponse.size() / pageable.getPageSize()))
+                .content(filteredStockHistoryResponse)
                 .build();
     }
 
-//    public CustomPageResponse<StockResponse>
+    public CustomPageResponse<StockResponse> getAllStock(Pageable pageable){
+        Page<Product> products = productRepository.findAll(pageable);
+
+        List <StockResponse> stockResponses = products.getContent().stream()
+                .map(product -> {
+                    List<StockResponse.VariantDTO> variantDTOList = product.getVariants().stream()
+                            .map(variant -> StockResponse.VariantDTO.builder()
+                                    .id(variant.getId())
+                                    .color(variant.getColor())
+                                    .price(variant.getPrice())
+                                    .stock(variant.getStock())
+                                    .build()
+                            ).toList();
+                    if (variantDTOList.isEmpty()) return null;
+
+                    return StockResponse.builder()
+                            .prdId(product.getId())
+                            .variantDTOS(variantDTOList)
+                            .productName(product.getName())
+                            .categoryName(product.getCategory().getName())
+                            .build();
+                        })
+                .filter(Objects::nonNull)
+                .toList();
+
+
+        return CustomPageResponse.<StockResponse>builder()
+                .pageSize(pageable.getPageSize())
+                .pageNumber(pageable.getPageNumber())
+                .totalElements(products.getTotalElements())
+                .totalPages(products.getTotalPages())
+                .content(stockResponses)
+                .build();
+    }
 }
