@@ -1,6 +1,8 @@
 package com.example.PhoneShop.entities;
 
 
+import com.example.PhoneShop.enums.UserPermissions;
+import com.example.PhoneShop.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +38,9 @@ public class User {
 
     @Column(name = "user_dob")
     LocalDate dob;
+
+    @Column(name = "user_permission")
+    UserPermissions userPermissions;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     @EqualsAndHashCode.Exclude

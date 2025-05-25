@@ -3,6 +3,7 @@ package com.example.PhoneShop.dto.response;
 import com.example.PhoneShop.entities.Address;
 import com.example.PhoneShop.entities.Avatar;
 import com.example.PhoneShop.entities.Role;
+import com.example.PhoneShop.enums.UserPermissions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class UserResponse {
     String email;
     String phoneNumber;
     LocalDate dob;
+    UserPermissions userPermissions;
     Set<Address> addresses = new HashSet<>();
     Avatar avatar;
     Role role;

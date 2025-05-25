@@ -4,6 +4,7 @@ import com.example.PhoneShop.entities.Address;
 import com.example.PhoneShop.entities.Cart;
 import com.example.PhoneShop.entities.Order;
 import com.example.PhoneShop.entities.Role;
+import com.example.PhoneShop.enums.UserPermissions;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,5 +24,6 @@ public class CreateUserRequest {
     String email;
     String password;
     String phoneNumber;
+    UserPermissions userPermissions;
     LocalDate dob;
 }

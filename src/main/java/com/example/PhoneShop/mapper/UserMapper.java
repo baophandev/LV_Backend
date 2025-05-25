@@ -10,5 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     User toUser(CreateUserRequest request);
+
+    @Mapping(target = "userPermissions", source = "user.userPermissions")
     UserResponse toUserResponse(User user);
 }

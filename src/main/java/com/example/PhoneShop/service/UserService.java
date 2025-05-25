@@ -47,6 +47,8 @@ public class UserService {
 
         user.setRole(roleRepository.findById(String.valueOf(UserRole.USER)).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")));
 
+        user.setUserPermissions(request.getUserPermissions());
+
         Avatar avatar = Avatar.builder()
                 .imageType(file.getContentType())
                 .data(file.getBytes())
@@ -70,6 +72,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         user.setRole(roleRepository.findById(String.valueOf(UserRole.EMPLOYEE)).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")));
+
+        user.setUserPermissions(request.getUserPermissions());
 
         Avatar avatar = Avatar.builder()
                 .imageType(file.getContentType())
