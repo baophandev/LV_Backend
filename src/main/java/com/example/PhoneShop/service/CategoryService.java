@@ -40,6 +40,7 @@ public class CategoryService {
         // Tạo mới Category, tự khởi tạo categoryImages để tránh null
         Category category = Category.builder()
                 .name(request.getName())
+                .description(request.getDescription())
                 .categoryImages(new ArrayList<>())
                 .build();
 
@@ -59,6 +60,47 @@ public class CategoryService {
         }
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.toCategoryResponse(savedCategory);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public CategoryResponse updateCategory(String categoryId, CreateCategoryRequest request, List<MultipartFile> files) throws IOException {
+
+        // Tìm category theo ID
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Category not found"));
+
+        // Kiểm tra nếu tên mới đã tồn tại cho một category khác
+        if (!category.getName().equals(request.getName()) &&
+                categoryRepository.existsByName(request.getName())) {
+            log.warn("Category name already in use: {}", request.getName());
+            throw new AppException(HttpStatus.CONFLICT, "Category name already in use");
+        }
+
+        // Cập nhật thông tin cơ bản
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+
+        // Nếu có file ảnh mới thì xóa ảnh cũ và thêm ảnh mới
+        if (files != null && !files.isEmpty()) {
+            // Xóa ảnh cũ
+            category.getCategoryImages().clear();
+
+            // Thêm ảnh mới
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    CategoryImage categoryImage = CategoryImage.builder()
+                            .imageType(file.getContentType())
+                            .data(file.getBytes())
+                            .category(category)
+                            .build();
+                    category.getCategoryImages().add(categoryImage);
+                }
+            }
+        }
+        // Nếu không có file thì giữ lại ảnh cũ
+
+        Category updatedCategory = categoryRepository.save(category);
+        return categoryMapper.toCategoryResponse(updatedCategory);
     }
 
     public List<CategoryResponse> getAll(){

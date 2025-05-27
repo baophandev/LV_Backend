@@ -12,5 +12,6 @@ import java.util.List;
 public class CategoryResponse {
     private String id;
     private String name;
+    private String description;
     List<CategoryImage> categoryImages = new ArrayList<>();
 }

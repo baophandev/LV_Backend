@@ -24,6 +24,9 @@ public class Category {
     @Column(name = "ctg_name", nullable = false)
     String name;
 
+    @Column(name = "ctg_description")
+    String description;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "category", orphanRemoval = true)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

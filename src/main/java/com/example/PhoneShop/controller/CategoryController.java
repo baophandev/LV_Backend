@@ -50,12 +50,13 @@ public class CategoryController {
         return "Category has been deleted";
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
             @PathVariable String id,
-            @RequestParam String name
-    ){
-        CategoryResponse categoryResponse = categoryService.updateCategory(id, name);
+            @RequestPart("category") @Valid CreateCategoryRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) throws IOException {
+        CategoryResponse categoryResponse = categoryService.updateCategory(id, request, files);
 
         ApiResponse<CategoryResponse> response = ApiResponse.<CategoryResponse>builder()
                 .message("Update category successfully")

@@ -12,6 +12,7 @@ public interface CategoryMapper {
     Category toCategory(CreateCategoryRequest request);
 
     @Mapping(target = "categoryImages", source = "category.categoryImages")
+    @Mapping(target = "description", source = "category.description")
     CategoryResponse toCategoryResponse(Category category);
 
 }
