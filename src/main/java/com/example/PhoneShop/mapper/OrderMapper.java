@@ -10,5 +10,6 @@ public interface OrderMapper {
 
     @Mapping(target = "orderId", source = "id")
     @Mapping(target = "receivedAt", source = "receivedAt")
+    @Mapping(target = "isPaid", source = "isPaid")
     OrderResponse toOrderResponse(Order order);
 }

@@ -60,6 +60,9 @@ public class Order {
     @Column(name = "order_status", nullable = false)
     private OrderStatus status;
 
+    @Column(name = "order_paid")
+    Boolean isPaid;
+
     @Column(name = "order_total_quantity", nullable = false)
     Integer totalQuantity;
 

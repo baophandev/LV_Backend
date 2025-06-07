@@ -30,6 +30,7 @@ public class OrderResponse {
     LocalDateTime orderDate;
     LocalDateTime receivedAt;
     String note;
+    Boolean isPaid;
     OrderMethod method;
     OrderStatus status;
     Integer totalQuantity;

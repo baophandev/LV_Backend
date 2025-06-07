@@ -21,10 +21,22 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
     @Query("SELECT FUNCTION('DATE', o.receivedAt) AS receivedAt, SUM(o.totalPrice) AS totalRevenue " +
             "FROM Order o " +
-            "WHERE o.status = :status " +
+            "WHERE o.isPaid = :isPaid " +
             "GROUP BY FUNCTION('DATE', o.receivedAt) " +
             "ORDER BY FUNCTION('DATE', o.receivedAt) DESC")
-    List<Object[]> findDailyRevenueByStatus(@Param("status") OrderStatus status);
+    List<Object[]> findDailyRevenueByIsPaid(@Param("isPaid") Boolean isPaid);
+
+    @Query("SELECT FUNCTION('DATE', o.receivedAt) AS date, SUM(o.totalPrice) AS totalRevenue " +
+            "FROM Order o " +
+            "WHERE o.status = :status " +
+            "AND o.receivedAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('DATE', o.receivedAt) " +
+            "ORDER BY FUNCTION('DATE', o.receivedAt) DESC")
+    List<Object[]> findDailyRevenueByStatusAndDateRange(
+            @Param("status") OrderStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
 
     // Tính tổng doanh thu trong khoảng thời gian và trạng thái cụ thể
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) " +

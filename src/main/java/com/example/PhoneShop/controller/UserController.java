@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<UserResponse> createUser(
             @RequestPart("user") @Valid CreateUserRequest request,
-            @RequestPart("avatar") MultipartFile file
+            @RequestPart(value = "avatar", required = false) MultipartFile file
             ) throws IOException {
         return ApiResponse.<UserResponse>builder()
                 .message("User created")
@@ -44,7 +44,7 @@ public class UserController {
     @PostMapping(value = "/employee",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<UserResponse> createUserEmployee(
             @RequestPart("user") @Valid CreateUserRequest request,
-            @RequestPart("avatar") MultipartFile file
+            @RequestPart(value = "avatar", required = false) MultipartFile file
     ) throws IOException {
         return ApiResponse.<UserResponse>builder()
                 .message("User created")

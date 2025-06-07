@@ -49,12 +49,14 @@ public class UserService {
 
         user.setUserPermissions(request.getUserPermissions());
 
-        Avatar avatar = Avatar.builder()
-                .imageType(file.getContentType())
-                .data(file.getBytes())
-                .user(user)
-                .build();
-        user.setAvatar(avatar);
+        if(file!=null && !file.isEmpty()){
+            Avatar avatar = Avatar.builder()
+                    .imageType(file.getContentType())
+                    .data(file.getBytes())
+                    .user(user)
+                    .build();
+            user.setAvatar(avatar);
+        }
 
         try {
             user = userRepository.save(user);
@@ -69,18 +71,21 @@ public class UserService {
     public UserResponse createUserEmployee(CreateUserRequest request, MultipartFile file) throws IOException {
         User user = userMapper.toUser(request);
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        String defaultPassword = "bao123";
+        user.setPassword(passwordEncoder.encode(defaultPassword));
 
         user.setRole(roleRepository.findById(String.valueOf(UserRole.EMPLOYEE)).orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Role not found")));
 
         user.setUserPermissions(request.getUserPermissions());
 
-        Avatar avatar = Avatar.builder()
-                .imageType(file.getContentType())
-                .data(file.getBytes())
-                .user(user)
-                .build();
-        user.setAvatar(avatar);
+        if(file!=null && !file.isEmpty()){
+            Avatar avatar = Avatar.builder()
+                    .imageType(file.getContentType())
+                    .data(file.getBytes())
+                    .user(user)
+                    .build();
+            user.setAvatar(avatar);
+        }
 
         try {
             user = userRepository.save(user);

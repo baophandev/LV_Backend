@@ -13,11 +13,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -77,10 +79,22 @@ public class OrderController {
         return  orderService.updateOrderStatus(orderId, status);
     }
 
+    @GetMapping("/revenue")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<List<DailyRevenueResponse>> getDailyRevenueByDateRange(
+            @RequestParam OrderStatus status,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+    ) {
+        return ResponseEntity.ok(orderService.getDailyRevenueByDateRange(status, start, end));
+    }
+
     @GetMapping("/revenue/daily")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<List<DailyRevenueResponse>> getDailyRevenue() {
-        return ResponseEntity.ok(orderService.getDailyRevenue());
+    public ResponseEntity<List<DailyRevenueResponse>> getDailyRevenue(
+            @RequestParam Boolean isPaid
+    ) {
+        return ResponseEntity.ok(orderService.getDailyRevenue(isPaid));
     }
 
     @GetMapping("/revenue/summary")
@@ -89,9 +103,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getSummaryRevenue());
     }
 
-    @GetMapping("/revenue/daily-products")
-    public ResponseEntity<List<ProductRevenueResponse>> getDailyProductRevenue() {
-        List<ProductRevenueResponse> revenueData = orderService.getDailyProductRevenue();
+    @GetMapping("/revenue/products")
+    public ResponseEntity<List<ProductRevenueResponse>> getProductRevenueByDateRangeAndStatus(
+            @RequestParam OrderStatus status,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+
+        List<ProductRevenueResponse> revenueData = orderService.getProductRevenueByDateRangeAndStatus(status, start, end);
         return ResponseEntity.ok(revenueData);
     }
+
 }

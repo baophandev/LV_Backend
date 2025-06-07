@@ -7,6 +7,7 @@ import com.example.PhoneShop.dto.response.OrderResponse;
 import com.example.PhoneShop.dto.response.ProductRevenueResponse;
 import com.example.PhoneShop.dto.response.SummaryRevenueResponse;
 import com.example.PhoneShop.entities.*;
+import com.example.PhoneShop.enums.OrderMethod;
 import com.example.PhoneShop.enums.OrderStatus;
 import com.example.PhoneShop.enums.ProductStatus;
 import com.example.PhoneShop.exception.AppException;
@@ -68,8 +69,13 @@ public class OrderService {
                 .orderDate(LocalDateTime.now())
                 .note(request.getNote())
                 .method(request.getMethod())
+                .isPaid(false)
                 .status(OrderStatus.PENDING)
                 .build();
+
+        if(request.getMethod() == OrderMethod.BANKING){
+            order.setIsPaid(true);
+        }
 
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -220,7 +226,10 @@ public class OrderService {
 
         if(orderStatus == OrderStatus.DELIVERED){
             LocalDateTime now = LocalDateTime.now();
+            order.setIsPaid(true);
             order.setReceivedAt(now);
+        }else {
+            order.setIsPaid(false);
         }
 
         orderRepository.save(order);
@@ -252,8 +261,8 @@ public class OrderService {
                 .build();
     }
 
-    public List<DailyRevenueResponse> getDailyRevenue() {
-        List<Object[]> results = orderRepository.findDailyRevenueByStatus(OrderStatus.DELIVERED);
+    public List<DailyRevenueResponse> getDailyRevenue(Boolean isPaid) {
+        List<Object[]> results = orderRepository.findDailyRevenueByIsPaid(isPaid);
 
         return results.stream()
                 .map(obj -> {
@@ -262,6 +271,24 @@ public class OrderService {
                     LocalDate date = sqlDate.toLocalDate();
 
                     // Cast tổng doanh thu sang kiểu Long
+                    Long totalRevenue = (Long) obj[1];
+
+                    return DailyRevenueResponse.builder()
+                            .date(date)
+                            .totalRevenue(totalRevenue)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<DailyRevenueResponse> getDailyRevenueByDateRange(OrderStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Object[]> results = orderRepository.findDailyRevenueByStatusAndDateRange(status, startDate, endDate);
+
+        return results.stream()
+                .map(obj -> {
+                    java.sql.Date sqlDate = (java.sql.Date) obj[0];
+                    LocalDate date = sqlDate.toLocalDate();
+
                     Long totalRevenue = (Long) obj[1];
 
                     return DailyRevenueResponse.builder()
@@ -323,25 +350,26 @@ public class OrderService {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public List<ProductRevenueResponse> getDailyProductRevenue(){
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfDay = now.with(LocalTime.MIN);  // ⏰ 00:00:00
-        LocalDateTime endOfDay = now.with(LocalTime.MAX);
+    public List<ProductRevenueResponse> getProductRevenueByDateRangeAndStatus(
+            OrderStatus status,
+            LocalDateTime start,
+            LocalDateTime end) {
 
-//        log.info("Querying product revenue from {} to {}", startOfDay, endOfDay);
+        // Nếu start hoặc end bị null, bạn có thể xử lý mặc định hoặc ném ngoại lệ tùy ý
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Start time and end time must be provided");
+        }
 
         List<Object[]> results = orderRepository.findProductRevenueByDate(
-                OrderStatus.DELIVERED,
-                startOfDay,
-                endOfDay
+                status,
+                start,
+                end
         );
-
-//        log.info("Found {} results", results.size());
 
         return results.stream()
                 .map(obj -> {
                     String productId = (String) obj[0];
-                    Long variantId = ((Number) obj[1]).longValue(); // Sửa thành Number -> Long
+                    Long variantId = ((Number) obj[1]).longValue(); // Chuyển từ Number sang Long
                     String productName = (String) obj[2];
                     String color = (String) obj[3];
                     Long totalRevenue = ((Number) obj[4]).longValue();
@@ -358,5 +386,6 @@ public class OrderService {
                 })
                 .collect(Collectors.toList());
     }
+
 
 }
