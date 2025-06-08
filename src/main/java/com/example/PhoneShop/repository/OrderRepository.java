@@ -20,11 +20,11 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     Page<Order> findByUserIdAndStatus(String userId, OrderStatus status, Pageable pageable);
 
     //thống kê doanh thu hàng ngày
-    @Query("SELECT FUNCTION('DATE', o.receivedAt) AS date, SUM(o.totalPrice) AS totalRevenue " +
+    @Query("SELECT FUNCTION('DATE', o.orderDate) AS date, SUM(o.totalPrice) AS totalRevenue " +
             "FROM Order o " +
             "WHERE o.isPaid = true " +
-            "GROUP BY FUNCTION('DATE', o.receivedAt) " +
-            "ORDER BY FUNCTION('DATE', o.receivedAt) DESC")
+            "GROUP BY FUNCTION('DATE', o.orderDate) " +
+            "ORDER BY FUNCTION('DATE', o.orderDate) DESC")
     List<Object[]> findDailyRevenuePaid();
 
     @Query("SELECT FUNCTION('DATE', o.orderDate) AS date, SUM(o.totalPrice) AS totalRevenue " +
@@ -36,12 +36,12 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
 
     //thống kê doanh thu ngày tùy chỉnh
-    @Query("SELECT FUNCTION('DATE', o.receivedAt) AS date, SUM(o.totalPrice) AS totalRevenue " +
+    @Query("SELECT FUNCTION('DATE', o.orderDate) AS date, SUM(o.totalPrice) AS totalRevenue " +
             "FROM Order o " +
             "WHERE o.isPaid = true " +
-            "AND o.receivedAt BETWEEN :startDate AND :endDate " +
-            "GROUP BY FUNCTION('DATE', o.receivedAt) " +
-            "ORDER BY FUNCTION('DATE', o.receivedAt) DESC")
+            "AND o.orderDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY FUNCTION('DATE', o.orderDate) " +
+            "ORDER BY FUNCTION('DATE', o.orderDate) DESC")
     List<Object[]> findDailyRevenueByReceivedDate(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
@@ -61,7 +61,7 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query("SELECT COALESCE(SUM(o.totalPrice), 0) " +
             "FROM Order o " +
             "WHERE o.isPaid = true " +
-            "AND o.receivedAt BETWEEN :startDate AND :endDate")
+            "AND o.orderDate BETWEEN :startDate AND :endDate")
     Long getRevenueByReceivedDate(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
@@ -81,20 +81,23 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query("SELECT oi.prdId, oi.variantId, oi.name, oi.color, SUM(oi.calculatePrice), SUM(oi.quantity) " +
             "FROM OrderItem oi " +
             "JOIN oi.order o " +
-            "WHERE o.isPaid = true AND o.receivedAt BETWEEN :start AND :end " +
+            "WHERE o.status NOT IN (:excludedStatuses) AND o.orderDate BETWEEN :start AND :end " +
             "GROUP BY oi.prdId, oi.variantId, oi.name, oi.color")
-    List<Object[]> findProductRevenueByReceivedDate(
+    List<Object[]> findProductRevenueByOrderDateAndStatus(
             @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end);
+            @Param("end") LocalDateTime end,
+            @Param("excludedStatuses") List<OrderStatus> excludedStatuses
+    );
 
-    @Query("SELECT oi.prdId, oi.variantId, oi.name, oi.color, SUM(oi.calculatePrice), SUM(oi.quantity) " +
-            "FROM OrderItem oi " +
-            "JOIN oi.order o " +
-            "WHERE o.isPaid = false AND o.orderDate BETWEEN :start AND :end " +
-            "GROUP BY oi.prdId, oi.variantId, oi.name, oi.color")
-    List<Object[]> findProductRevenueByOrderDate(
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end);
+
+    //Số lượng sản phẩm đã bán bao gồm cả đã thanh toán và chưa thanh toán
+    @Query("SELECT SUM(o.totalQuantity) FROM Order o " +
+            "WHERE o.status NOT IN (:excludedStatuses) " +
+            "AND o.orderDate BETWEEN :startDate AND :endDate")
+    Long findTotalSoldQuantityByDateRangeExcludingStatuses(
+            @Param("excludedStatuses") List<OrderStatus> excludedStatuses,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
 
 }

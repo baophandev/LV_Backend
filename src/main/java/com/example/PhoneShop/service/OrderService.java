@@ -390,17 +390,15 @@ public class OrderService {
     }
 
     public List<ProductRevenueResponse> getProductRevenueByDateRangeAndPaidStatus(
-            Boolean isPaid,
             LocalDateTime start,
             LocalDateTime end) {
 
-        if (start == null || end == null || isPaid == null) {
+        if (start == null || end == null) {
             throw new IllegalArgumentException("Thời gian và trạng thái thanh toán là bắt buộc.");
         }
+        List<OrderStatus> excluded = List.of(OrderStatus.CANCELLED, OrderStatus.REFUNDED);
 
-        List<Object[]> results = isPaid
-                ? orderRepository.findProductRevenueByReceivedDate(start, end)
-                : orderRepository.findProductRevenueByOrderDate(start, end);
+        List<Object[]> results = orderRepository.findProductRevenueByOrderDateAndStatus(start, end, excluded);
 
         return results.stream()
                 .map(obj -> {
@@ -424,5 +422,12 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public Long getTotalSoldQuantity(LocalDateTime start, LocalDateTime end) {
+        List<OrderStatus> excludedStatuses = List.of(OrderStatus.CANCELLED, OrderStatus.REFUNDED);
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Thời gian và trạng thái thanh toán là bắt buộc.");
+        }
+        return  orderRepository.findTotalSoldQuantityByDateRangeExcludingStatuses(excludedStatuses, start, end);
+    }
 
 }

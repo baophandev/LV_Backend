@@ -108,12 +108,22 @@ public class OrderController {
     }
 
     @GetMapping("/revenue/products")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<List<ProductRevenueResponse>> getProductRevenueByDateRangeAndStatus(
-            @RequestParam Boolean status,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
-        List<ProductRevenueResponse> revenueData = orderService.getProductRevenueByDateRangeAndPaidStatus(status, start, end);
+        List<ProductRevenueResponse> revenueData = orderService.getProductRevenueByDateRangeAndPaidStatus(start, end);
+        return ResponseEntity.ok(revenueData);
+    }
+
+    @GetMapping("/revenue/sold")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public ResponseEntity<Long> getTotalSoldQuantity(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+
+        Long revenueData = orderService.getTotalSoldQuantity( start, end );
         return ResponseEntity.ok(revenueData);
     }
 
