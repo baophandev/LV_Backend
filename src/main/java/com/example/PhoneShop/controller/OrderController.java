@@ -82,11 +82,11 @@ public class OrderController {
     @GetMapping("/revenue")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public ResponseEntity<List<DailyRevenueResponse>> getDailyRevenueByDateRange(
-            @RequestParam OrderStatus status,
+            @RequestParam Boolean isPaid,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
     ) {
-        return ResponseEntity.ok(orderService.getDailyRevenueByDateRange(status, start, end));
+        return ResponseEntity.ok(orderService.getDailyRevenueByDateRange(isPaid, start, end));
     }
 
     @GetMapping("/revenue/daily")
@@ -99,17 +99,21 @@ public class OrderController {
 
     @GetMapping("/revenue/summary")
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<SummaryRevenueResponse> getRevenueSummary() {
-        return ResponseEntity.ok(orderService.getSummaryRevenue());
+    public ResponseEntity<Long> getRevenueSummary(
+            @RequestParam Boolean isPaid,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+    ) {
+        return ResponseEntity.ok(orderService.getRevenueByIsPaidAndPeriod(isPaid, start, end));
     }
 
     @GetMapping("/revenue/products")
     public ResponseEntity<List<ProductRevenueResponse>> getProductRevenueByDateRangeAndStatus(
-            @RequestParam OrderStatus status,
+            @RequestParam Boolean status,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
 
-        List<ProductRevenueResponse> revenueData = orderService.getProductRevenueByDateRangeAndStatus(status, start, end);
+        List<ProductRevenueResponse> revenueData = orderService.getProductRevenueByDateRangeAndPaidStatus(status, start, end);
         return ResponseEntity.ok(revenueData);
     }
 

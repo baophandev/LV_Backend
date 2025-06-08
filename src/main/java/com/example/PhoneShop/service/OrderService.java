@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -262,7 +263,13 @@ public class OrderService {
     }
 
     public List<DailyRevenueResponse> getDailyRevenue(Boolean isPaid) {
-        List<Object[]> results = orderRepository.findDailyRevenueByIsPaid(isPaid);
+        List<Object[]> results;
+
+        if (Boolean.TRUE.equals(isPaid)) {
+            results = orderRepository.findDailyRevenuePaid();
+        } else {
+            results = orderRepository.findDailyRevenueUnpaid();
+        }
 
         return results.stream()
                 .map(obj -> {
@@ -281,15 +288,36 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public List<DailyRevenueResponse> getDailyRevenueByDateRange(OrderStatus status, LocalDateTime startDate, LocalDateTime endDate) {
-        List<Object[]> results = orderRepository.findDailyRevenueByStatusAndDateRange(status, startDate, endDate);
+    public List<DailyRevenueResponse> getDailyRevenueByDateRange(boolean isPaid, LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date must not be null");
+        }
+
+        List<Object[]> results = isPaid
+                ? orderRepository.findDailyRevenueByReceivedDate(startDate, endDate)
+                : orderRepository.findDailyRevenueByOrderDate(startDate, endDate);
+
 
         return results.stream()
                 .map(obj -> {
-                    java.sql.Date sqlDate = (java.sql.Date) obj[0];
-                    LocalDate date = sqlDate.toLocalDate();
+                    if (obj == null || obj.length < 2) {
+                        throw new IllegalArgumentException("Invalid result row from database");
+                    }
 
-                    Long totalRevenue = (Long) obj[1];
+                    LocalDate date;
+                    Object dateObj = obj[0];
+
+                    if (dateObj instanceof LocalDate) {
+                        date = (LocalDate) dateObj;
+                    } else if (dateObj instanceof java.sql.Date) {
+                        date = ((java.sql.Date) dateObj).toLocalDate();
+                    } else if (dateObj instanceof java.sql.Timestamp) {
+                        date = ((java.sql.Timestamp) dateObj).toLocalDateTime().toLocalDate();
+                    } else {
+                        throw new IllegalArgumentException("Unsupported date type: " + dateObj.getClass().getName());
+                    }
+
+                    Long totalRevenue = ((Number) obj[1]).longValue();
 
                     return DailyRevenueResponse.builder()
                             .date(date)
@@ -299,81 +327,89 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public SummaryRevenueResponse getSummaryRevenue() {
-        OrderStatus completedStatus = OrderStatus.DELIVERED;
 
-        // Tính toán các mốc thời gian
-        LocalDateTime now = LocalDateTime.now();
 
-        // 1. Doanh thu trong ngày
-        LocalDateTime startOfDay = now.with(LocalTime.MIN); // 00:00:00
-        LocalDateTime endOfDay = now.with(LocalTime.MAX);   // 23:59:59.999999999
-        Long dailyRevenue = orderRepository.getRevenueByPeriod(
-                completedStatus,
-                startOfDay,
-                endOfDay
-        );
+//    public SummaryRevenueResponse getSummaryRevenue() {
+//        OrderStatus completedStatus = OrderStatus.DELIVERED;
+//
+//        // Tính toán các mốc thời gian
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        // 1. Doanh thu trong ngày
+//        LocalDateTime startOfDay = now.with(LocalTime.MIN); // 00:00:00
+//        LocalDateTime endOfDay = now.with(LocalTime.MAX);   // 23:59:59.999999999
+//        Long dailyRevenue = orderRepository.getRevenueByPeriod(
+//                completedStatus,
+//                startOfDay,
+//                endOfDay
+//        );
+//
+//        // 2. Doanh thu trong tuần (tính từ Thứ 2 đầu tiên của tuần)
+//        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
+//        LocalDateTime endOfWeek = startOfWeek.plusDays(6).with(LocalTime.MAX);
+//        Long weeklyRevenue = orderRepository.getRevenueByPeriod(
+//                completedStatus,
+//                startOfWeek,
+//                endOfWeek
+//        );
+//
+//        // 3. Doanh thu trong tháng
+//        LocalDateTime startOfMonth = now.withDayOfMonth(1).with(LocalTime.MIN);
+//        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+//        Long monthlyRevenue = orderRepository.getRevenueByPeriod(
+//                completedStatus,
+//                startOfMonth,
+//                endOfMonth
+//        );
+//
+//        // 4. Doanh thu trong năm
+//        LocalDateTime startOfYear = now.withDayOfYear(1).with(LocalTime.MIN);
+//        LocalDateTime endOfYear = now.with(TemporalAdjusters.lastDayOfYear()).with(LocalTime.MAX);
+//        Long yearlyRevenue = orderRepository.getRevenueByPeriod(
+//                completedStatus,
+//                startOfYear,
+//                endOfYear
+//        );
+//
+//        return SummaryRevenueResponse.builder()
+//                .dailyRevenue(dailyRevenue)
+//                .weeklyRevenue(weeklyRevenue)
+//                .monthlyRevenue(monthlyRevenue)
+//                .yearlyRevenue(yearlyRevenue)
+//                .build();
+//    }
 
-        // 2. Doanh thu trong tuần (tính từ Thứ 2 đầu tiên của tuần)
-        LocalDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).with(LocalTime.MIN);
-        LocalDateTime endOfWeek = startOfWeek.plusDays(6).with(LocalTime.MAX);
-        Long weeklyRevenue = orderRepository.getRevenueByPeriod(
-                completedStatus,
-                startOfWeek,
-                endOfWeek
-        );
+    public Long getRevenueByIsPaidAndPeriod(boolean isPaid, LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date must not be null");
+        }
 
-        // 3. Doanh thu trong tháng
-        LocalDateTime startOfMonth = now.withDayOfMonth(1).with(LocalTime.MIN);
-        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
-        Long monthlyRevenue = orderRepository.getRevenueByPeriod(
-                completedStatus,
-                startOfMonth,
-                endOfMonth
-        );
-
-        // 4. Doanh thu trong năm
-        LocalDateTime startOfYear = now.withDayOfYear(1).with(LocalTime.MIN);
-        LocalDateTime endOfYear = now.with(TemporalAdjusters.lastDayOfYear()).with(LocalTime.MAX);
-        Long yearlyRevenue = orderRepository.getRevenueByPeriod(
-                completedStatus,
-                startOfYear,
-                endOfYear
-        );
-
-        return SummaryRevenueResponse.builder()
-                .dailyRevenue(dailyRevenue)
-                .weeklyRevenue(weeklyRevenue)
-                .monthlyRevenue(monthlyRevenue)
-                .yearlyRevenue(yearlyRevenue)
-                .build();
+        return isPaid
+                ? orderRepository.getRevenueByReceivedDate(startDate, endDate)
+                : orderRepository.getRevenueByOrderDate(startDate, endDate);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public List<ProductRevenueResponse> getProductRevenueByDateRangeAndStatus(
-            OrderStatus status,
+    public List<ProductRevenueResponse> getProductRevenueByDateRangeAndPaidStatus(
+            Boolean isPaid,
             LocalDateTime start,
             LocalDateTime end) {
 
-        // Nếu start hoặc end bị null, bạn có thể xử lý mặc định hoặc ném ngoại lệ tùy ý
-        if (start == null || end == null) {
-            throw new IllegalArgumentException("Start time and end time must be provided");
+        if (start == null || end == null || isPaid == null) {
+            throw new IllegalArgumentException("Thời gian và trạng thái thanh toán là bắt buộc.");
         }
 
-        List<Object[]> results = orderRepository.findProductRevenueByDate(
-                status,
-                start,
-                end
-        );
+        List<Object[]> results = isPaid
+                ? orderRepository.findProductRevenueByReceivedDate(start, end)
+                : orderRepository.findProductRevenueByOrderDate(start, end);
 
         return results.stream()
                 .map(obj -> {
                     String productId = (String) obj[0];
-                    Long variantId = ((Number) obj[1]).longValue(); // Chuyển từ Number sang Long
+                    Long variantId = obj[1] != null ? ((Number) obj[1]).longValue() : null;
                     String productName = (String) obj[2];
                     String color = (String) obj[3];
-                    Long totalRevenue = ((Number) obj[4]).longValue();
-                    Integer totalQuantity = ((Number) obj[5]).intValue();
+                    Long totalRevenue = obj[4] != null ? ((Number) obj[4]).longValue() : 0L;
+                    Integer totalQuantity = obj[5] != null ? ((Number) obj[5]).intValue() : 0;
 
                     return ProductRevenueResponse.builder()
                             .productId(productId)
@@ -384,6 +420,7 @@ public class OrderService {
                             .totalQuantity(totalQuantity)
                             .build();
                 })
+                .sorted(Comparator.comparing(ProductRevenueResponse::getTotalQuantity).reversed()) // Sắp xếp giảm dần theo totalQuantity
                 .collect(Collectors.toList());
     }
 
