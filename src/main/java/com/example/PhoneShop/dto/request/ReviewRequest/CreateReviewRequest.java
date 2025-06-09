@@ -13,4 +13,5 @@ public class CreateReviewRequest {
     String userId;
     String comment;
     Double rating;
+    Long orderItemId;
 }

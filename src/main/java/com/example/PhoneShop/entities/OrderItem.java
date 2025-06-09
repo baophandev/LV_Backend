@@ -38,6 +38,9 @@ public class OrderItem {
     @Column(name = "order_quantity", nullable = false)
     Integer quantity = 0;
 
+    @Column(name = "is_reviewed", nullable = false)
+    Boolean isReviewed = false;
+
     @Column(name = "price_at_order", nullable = false)
     Integer priceAtOrder = 0;
 

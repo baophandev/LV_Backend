@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +32,7 @@ public class ReviewController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<ReviewResponse> createReview(
             @RequestPart("data") @Valid CreateReviewRequest request,
-            @RequestPart("files") List<MultipartFile> files
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
             ) throws IOException {
         ReviewResponse reviewResponse = reviewService.create(request, files);
 
@@ -50,5 +52,16 @@ public class ReviewController {
         Pageable pageable = PageRequest.of(page, size);
         return reviewService.getAllByPrdId(productId, pageable);
     }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<CustomPageResponse<ReviewResponse>> getAllReviewsForAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "none") String sort // "asc", "desc", or "none"
+    ) {
+        CustomPageResponse<ReviewResponse> response = reviewService.getAllReviewsForAdmin(page, size, sort);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

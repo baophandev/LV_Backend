@@ -264,11 +264,11 @@ public class OrderService {
 
     public List<DailyRevenueResponse> getDailyRevenue(Boolean isPaid) {
         List<Object[]> results;
-
+        List<OrderStatus> excluded = List.of(OrderStatus.CANCELLED, OrderStatus.REFUNDED);
         if (Boolean.TRUE.equals(isPaid)) {
-            results = orderRepository.findDailyRevenuePaid();
+            results = orderRepository.findDailyRevenuePaid(excluded);
         } else {
-            results = orderRepository.findDailyRevenueUnpaid();
+            results = orderRepository.findDailyRevenueUnpaid(excluded);
         }
 
         return results.stream()
@@ -293,9 +293,10 @@ public class OrderService {
             throw new IllegalArgumentException("Start date and end date must not be null");
         }
 
+        List<OrderStatus> excluded = List.of(OrderStatus.CANCELLED, OrderStatus.REFUNDED);
         List<Object[]> results = isPaid
-                ? orderRepository.findDailyRevenueByReceivedDate(startDate, endDate)
-                : orderRepository.findDailyRevenueByOrderDate(startDate, endDate);
+                ? orderRepository.findDailyRevenueByReceivedDate(startDate, endDate, excluded)
+                : orderRepository.findDailyRevenueByOrderDate(startDate, endDate, excluded);
 
 
         return results.stream()
@@ -384,9 +385,11 @@ public class OrderService {
             throw new IllegalArgumentException("Start date and end date must not be null");
         }
 
+        List<OrderStatus> excluded = List.of(OrderStatus.CANCELLED, OrderStatus.REFUNDED);
+
         return isPaid
-                ? orderRepository.getRevenueByReceivedDate(startDate, endDate)
-                : orderRepository.getRevenueByOrderDate(startDate, endDate);
+                ? orderRepository.getRevenueByReceivedDate(startDate, endDate, excluded)
+                : orderRepository.getRevenueByOrderDate(startDate, endDate, excluded);
     }
 
     public List<ProductRevenueResponse> getProductRevenueByDateRangeAndPaidStatus(

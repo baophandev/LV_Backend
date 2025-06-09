@@ -4,10 +4,7 @@ import com.example.PhoneShop.dto.api.CustomPageResponse;
 import com.example.PhoneShop.dto.request.ReviewRequest.CreateReviewRequest;
 import com.example.PhoneShop.dto.response.ProductResponse;
 import com.example.PhoneShop.dto.response.ReviewResponse;
-import com.example.PhoneShop.entities.Product;
-import com.example.PhoneShop.entities.Review;
-import com.example.PhoneShop.entities.ReviewImage;
-import com.example.PhoneShop.entities.User;
+import com.example.PhoneShop.entities.*;
 import com.example.PhoneShop.exception.AppException;
 import com.example.PhoneShop.mapper.ReviewMapper;
 import com.example.PhoneShop.repository.*;
@@ -16,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -34,8 +33,7 @@ import java.util.List;
 public class ReviewService {
     ProductRepository productRepository;
     ReviewRepository reviewRepository;
-    OrderRepository orderRepository;
-    ReviewImageRepository reviewImageRepository;
+    OrderItemRepository orderItemRepository;
     ReviewMapper reviewMapper;
     UserRepository userRepository;
 
@@ -48,12 +46,17 @@ public class ReviewService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User does not exist!"));
 
+        OrderItem orderItem = orderItemRepository.findById(request.getOrderItemId())
+                .orElseThrow( () -> new AppException(HttpStatus.NOT_FOUND, "OrderItem does not exist!"));
+
         Review review = new Review();
-        review.setComment(request.getComment());
+        review.setComment(request.getComment().trim());
         review.setProduct(product);
         review.setRating(request.getRating());
         review.setUser(user);
         review.setCreatedAt(LocalDateTime.now());
+        orderItem.setIsReviewed(true);
+        orderItemRepository.save(orderItem);
 
         List<ReviewImage> images = new ArrayList<>();
 
@@ -68,10 +71,8 @@ public class ReviewService {
                     images.add(image);
                 }
             }
+            review.setImages(images);
         }
-
-
-        review.setImages(images);
 
         reviewRepository.save(review);
 
@@ -110,5 +111,35 @@ public class ReviewService {
                 .content(reviewResponses)
                 .build();
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public CustomPageResponse<ReviewResponse> getAllReviewsForAdmin(int page, int size, String sortDirection) {
+        Sort sort;
+
+        if ("asc".equalsIgnoreCase(sortDirection)) {
+            sort = Sort.by("createdAt").ascending();
+        } else if ("desc".equalsIgnoreCase(sortDirection)) {
+            sort = Sort.by("createdAt").descending();
+        } else {
+            sort = Sort.unsorted();
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Review> reviews = reviewRepository.findAll(pageable);
+
+        List<ReviewResponse> reviewResponses = reviews.getContent().stream()
+                .map(reviewMapper::toReviewResponse)
+                .toList();
+
+        return CustomPageResponse.<ReviewResponse>builder()
+                .pageNumber(reviews.getNumber())
+                .pageSize(reviews.getSize())
+                .totalElements(reviews.getTotalElements())
+                .totalPages(reviews.getTotalPages())
+                .content(reviewResponses)
+                .build();
+    }
+
 
 }
