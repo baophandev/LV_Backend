@@ -18,6 +18,8 @@ public class ReviewResponse {
     String id;
     String prdId;
     String displayName;
+    String productName;
+    String color;
     String comment;
     Double rating;
     LocalDateTime createdAt;

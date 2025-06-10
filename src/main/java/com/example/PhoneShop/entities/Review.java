@@ -27,6 +27,12 @@ public class Review {
     @Column(name = "rvw_comment", nullable = false)
     String comment;
 
+    @Column(name = "rvm_product_name")
+    String productName;
+
+    @Column(name = "rvm_product_color")
+    String color;
+
     @Column(name = "rvm_rating")
     Double rating;
 

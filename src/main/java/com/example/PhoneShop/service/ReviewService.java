@@ -55,6 +55,8 @@ public class ReviewService {
         review.setRating(request.getRating());
         review.setUser(user);
         review.setCreatedAt(LocalDateTime.now());
+        review.setProductName(product.getName());
+        review.setColor(orderItem.getColor());
         orderItem.setIsReviewed(true);
         orderItemRepository.save(orderItem);
 

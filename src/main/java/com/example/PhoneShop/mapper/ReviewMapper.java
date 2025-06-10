@@ -12,5 +12,7 @@ public interface ReviewMapper {
 
     @Mapping(target = "displayName", source = "user.displayName")
     @Mapping(target = "prdId", source = "product.id")
+    @Mapping(target = "productName", source = "review.productName")
+    @Mapping(target = "color", source = "review.color")
     ReviewResponse toReviewResponse(Review review);
 }
